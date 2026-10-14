@@ -1230,8 +1230,12 @@ function home(){
     <p class="warn">乳児の死亡、いじめ、事故、病気、離婚、暴力団、夜の仕事、自殺のような重い出来事も、実際の統計どおりの確率で起こります。自殺の方法や理由は描きません。18歳以上向け。</p>
   </section>
   ${mem.length?`<section class="sheet"><h3 style="font-size:18px">前世の記録</h3><div class="mem" style="margin-top:8px">${mem.map(m=>`<div><span>${esc(m.name)}（${esc(m.pref)}・${esc(m.job||"")}）</span><span class="num muted">${m.age}歳・${esc(m.cause)}</span></div>`).join("")}</div></section>`:""}
+  <section class="sheet" id="samples"><span class="label">最近ここで生まれた人たち</span><p class="muted" style="font-size:12px;margin-top:2px">シミュレーションの例。開くたびに変わります。</p><div class="mem" id="samplelist" style="margin-top:8px"></div></section>
   ${REVIEW_API?`<section class="sheet" id="reviews"></section>`:""}
   ${sourcesHTML()}`;
+  setTimeout(()=>{const el=$("#samplelist");if(!el)return;const rows=[];for(let i=0;i<5;i++){const o=shadowLife().L;const r=rarity(o);const path=[o.home+(o.town||""),o.hs?o.hs.name.replace(/\(.*$/,""):null,o.univ?o.univ.name+(o.fac?" "+o.fac:""):o.edu==="専門"?"専門学校":null,o.job||"無職"].filter(Boolean).join(" → ");
+    rows.push(`<div style="display:block"><p style="margin:0;font-size:14px"><b style="font-family:var(--display)">${esc(o.name)}</b>　<span class="muted">${o.age}歳・${esc(o.cause==="自殺"?"自死":(o.causeDetail||o.cause))}</span>　<span class="rare"><span class="rk">${r.rank}</span></span></p><p class="muted" style="margin:0;font-size:12px">「${esc(lifeTitle(o))}」　${esc(path)}。${o.partner?esc(o.partner)+"と結婚":"独身"}${o.kids.length?"・子"+o.kids.length+"人":""}。生涯年収${yen(o.lifetime)}。</p></div>`)}
+    el.innerHTML=rows.join("")},30);
   const t0=Date.now();clearInterval(S.cnt);
   const BI=31536000/686173,DI=31536000/1605378;
   S.cnt=setInterval(()=>{const s=(Date.now()-t0)/1000;const cb=$("#cb"),cd=$("#cd");if(!cb){clearInterval(S.cnt);return}
