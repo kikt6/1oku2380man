@@ -1215,6 +1215,18 @@ function stepYear(L){
   if(x===19&&L.univ&&!F.cultAsk&&R()<.08){F.cultAsk=1;return decCult(L)}
   if(x>=30&&x<=45&&!F.famBiz&&/自営業|農家/.test(L.parentJob)&&!F.single&&!F.parentDead&&R()<.12){F.famBiz=1;return decFamilyBiz(L)}
   if(x>=20&&x<=50&&!F.gambleAsk&&R()<.025){F.gambleAsk=1;return decGamble(L)}
+  if(x===12&&!F.clubAsk&&R()<.5){F.clubAsk=1;return decClub(L)}
+  if(x>=19&&x<=21&&L.univ&&!F.abroadAsk&&R()<.12){F.abroadAsk=1;return decAbroad(L)}
+  if(x>=25&&x<=50&&L.job&&!L.retired&&/会社員|事務|営業|SE|エンジニア|銀行|公務員/.test(L.job+(JOBS[L.job]&&JOBS[L.job].reg?"会社員":""))&&!F.sideAsk&&R()<.04){F.sideAsk=1;return decSide(L)}
+  if(x>=30&&x<=48&&L.married&&!F.houseAsk&&!F.house&&L.income>300&&R()<.08){F.houseAsk=1;return decHouse(L)}
+  if(x>=28&&x<=52&&L.married&&L.job&&!L.retired&&JOBS[L.job]&&JOBS[L.job].reg&&!F.transferAsk&&R()<.03){F.transferAsk=1;return decTransfer(L)}
+  if(x>=35&&x<=55&&!F.reunion&&R()<.03){F.reunion=1;return decReunion(L)}
+  if(x>=25&&x<=60&&!F.petAsk&&R()<.025){F.petAsk=1;return decPet(L)}
+  if(x>=28&&x<=48&&L.where&&L.where!==L.p.full&&!F.momDead&&!F.uturnAsk&&R()<.04){F.uturnAsk=1;return decUturn(L)}
+  if(x>=62&&x<=78&&L.kids.some(k=>!k.dead&&x-k.born>=30)&&!F.gkAsk&&R()<.06){F.gkAsk=1;return decGrandkid(L)}
+  if(x>=74&&x<=88&&!F.licAsk&&R()<.12){F.licAsk=1;return decLicense(L)}
+  if(x>=65&&x<=82&&!F.shukatsu&&R()<.06){F.shukatsu=1;return decShukatsu(L)}
+  if(x>=20&&x<=65&&!F.disaster&&yearOf(L)>=1995&&R()<.02){F.disaster=1;return decDisaster(L)}
   if(F.gamble){const hard=F.gambleHard;const loss=hard?60+Math.floor(R()*120):10+Math.floor(R()*20);L.assets-=loss;if(R()<(hard?.5:.15))log(L,hard?pick([`${F.gamble}で今月${loss}万円負けた。生活費を借りた。`,`${F.gamble}の金を作るために、消費者金融を3社回った。`,`${L.married?L.partner+"に":"母に"}${F.gamble}の借金がばれた。`,`給料日に${F.gamble}で全部溶かした。`,"ギャンブル依存の自助グループに1回だけ行った。"]):pick([`${F.gamble}で${loss}万円負けた。`,`${F.gamble}で5万円勝った。トータルは負けている。`]),hard?"red":"");
     if(hard&&R()<.1){F.gamble=null;F.gambleHard=0;log(L,pick(["借金が500万円を超え、家族に土下座して、ギャンブルをやめた。自助グループに通っている。","家族に見放され、一人になってから、やめた。"]),"big");add(L,"j",5)}else if(hard&&L.married&&R()<.08)divorce(L,"ギャンブルの借金が原因で");}
   if(x>=45&&x<=65&&!F.care&&!F.momDead&&R()<.05){F.care=1;return decCare(L)}
@@ -1427,6 +1439,16 @@ function choose(L,opts){return wpick(opts,opts.map(o=>o.w||1))}
 
 // ===== 選択のこだま（過去の選択が後の人生に返ってくる） =====
 const ECHO=[
+  [/中学の部活を決める日/,/気になっていた部/,[["中学の部活の仲間と、30年ぶりに集まった。","r",5],["あのときひとりで入った部活のことを、子どもに話した。","j",3]]],
+  [/交換留学/,/応募する/,[["留学先の友だちが、日本に遊びに来た。","r",5],["仕事で英語の資料を任された。留学がやっと役に立った。","k",4]]],
+  [/交換留学/,/見送る/,[["空港で、留学に行く学生の集団を見た。少しうらやましかった。","j",-2]]],
+  [/家を買わない/,/^買う$/,[["家のローンの残高が、ようやく半分を切った。","j",4],["柱に刻んだ子どもの背比べの線が、天井近くまで届いた。","r",4]]],
+  [/転勤の辞令/,/単身赴任/,[["単身赴任していた3年間のことを、子どもはあまり覚えていなかった。","r",-3]]],
+  [/転勤の辞令/,/家族で引っ越す/,[["転勤先で生まれ育ったようなものだと、子どもが言った。","r",4]]],
+  [/を飼いたい/,/^飼う$/,[["ペットが年をとった。散歩がゆっくりになった。","j",-1],["ペットを看取った。家が急に広くなった。","j",-6]]],
+  [/Uターン/,/地元に戻る/,[["地元に戻ってよかったと、親の葬儀のときに思った。","j",4]]],
+  [/Uターン/,/残る/,[["親が倒れたと聞き、新幹線に飛び乗った。もっと帰っておけばよかった。","j",-4]]],
+  [/災害ボランティア/,/現地に行く/,[["ボランティアで行った町から、復興祭りの案内が届いた。","j",4]]],
   [/が倒れている|溺れ|助けを求め|線路|川に|火事/,/^助ける$/,[["あのとき助けた人から、毎年年賀状が届くようになった。","r",4],["「あの時はありがとうございました」と駅で声をかけられた。顔は覚えていなかった。","j",5],["昔助けた人の息子が、偶然同じ職場に入ってきた。世間は狭い。","r",5]]],
   [/が倒れている|溺れ|助けを求め|線路|川に|火事/,/通報だけ/,[["あの日、もう少し何かできたのではと、ときどき思う。","j",-2],["救急車のサイレンを聞くと、あの日を思い出す。","j",-1]]],
   [/いじめられている。/,/^助ける$/,[["同窓会で、昔かばった同級生が「あのときはありがとう」と言った。","j",6],["かばった同級生とは、今も年に一度飲む。","r",5]]],
@@ -1793,6 +1815,49 @@ function decMarry(L){L.flags.pendMar=1;const ps=L.sex==="M"?"F":"M";const partne
 function decAffair(L){return{moral:1,title:`${L.cast.affair}との不倫が、${L.partner}にばれた。`,text:"",opts:[
   {t:"謝って修復を試みる",w:2,f(){if(R()<.5){log(L,"時間をかけて関係を修復した。");add(L,"r",-5)}else divorce(L,"不倫が原因で");}},
   {t:"離婚する",w:1,f(){divorce(L,"不倫が原因で");L.assets-=300;log(L,"慰謝料300万円を払った。","red")}}]}}
+// ===== 追加シナリオ（人生の各段階の決断） =====
+function decClub(L){return{moral:1,title:`中学の部活を決める日。仲のいい友だちは${pick(["サッカー部","バスケ部","吹奏楽部","陸上部"])}に入るらしい。`,text:"本当は、ずっと気になっている部がある。",opts:[
+  {t:"友だちと同じ部に入る",w:3,f(){log(L,"友だちと同じ部に入った。3年間、毎日いっしょに帰った。");add(L,"r",6)}},
+  {t:"気になっていた部に入る",w:2,f(){const c=pick(["美術部","将棋部","科学部","弓道部","演劇部","卓球部"]);if(R()<.6){log(L,`ひとりで${c}に入った。最初は誰とも話せなかったが、2年の夏に${pick(["県のコンクールで入賞した","初めて試合に勝った","一生の友だちができた"])}。`,"big");add(L,"j",7);add(L,"k",3)}else{log(L,`${c}に入ったが、なじめずに半年でやめた。`);add(L,"j",-3)}}},
+  {t:"帰宅部にする",w:1,f(){log(L,"帰宅部になった。放課後は"+pick(["ゲームばかりしていた。","図書館に通った。","家の手伝いをした。"]));add(L,"k",2);add(L,"r",-2)}}]}}
+function decAbroad(L){const c=pick(["アメリカ","イギリス","カナダ","オーストラリア","ドイツ","台湾"]);return{moral:1,title:`大学の掲示板で、${c}への交換留学の募集を見つけた。`,text:`期間は1年。留年するかもしれない。費用は奨学金を引いても${100+Math.floor(R()*4)*50}万円かかる。`,opts:[
+  {t:"応募する",w:2,f(){if(L.assets<100&&L.flags.poor){log(L,`応募したが、費用が出せず辞退した。${c}の写真を見るのはしばらくやめた。`,"red");add(L,"j",-5);return}if(R()<.7){log(L,`${c}に1年間留学した。${pick(["最初の3か月は、誰とも話せなかった。","現地の友だちの家で感謝祭を過ごした。","帰りの飛行機で泣いた。","日本のことを何も知らないと気づいた。"])}`,"big");L.flags.abroad=1;add(L,"j",8);add(L,"k",6);L.assets-=150}else{log(L,"学内選考で落ちた。受かったのは、帰国子女の同級生だった。");add(L,"j",-3)}}},
+  {t:"今回は見送る",w:3,f(){log(L,`留学は見送った。${pick(["卒業は予定どおり。","その1年でバイト代を貯めた。","「いつか行こう」と思って、そのいつかは来なかった。"])}`)}}]}}
+function decSide(L){const y=yearOf(L);const k=y>=2015?pick(["週末だけのWeb制作","ブログ","フリマでの転売","週末の配達","動画編集の請け負い"]):pick(["週末の家庭教師","夜のコンビニバイト","知り合いの店の手伝い","内職"]);return{moral:1,title:`給料が上がらない。${k}で副業をしようか迷っている。`,text:"会社の就業規則には「副業は届け出制」と書いてある。",opts:[
+  {t:"届け出て始める",w:2,f(){if(R()<.25){const g=60+Math.floor(R()*200);log(L,`${k}が軌道に乗り、年${g}万円の副収入になった。${R()<.3?"3年後、そちらを本業にした。":""}`,"big");L.assets+=g*2;add(L,"j",5)}else{log(L,`${k}を始めた。月に数万円にはなったが、睡眠時間が減った。`);L.assets+=40;add(L,"h",-4)}}},
+  {t:"黙って始める",w:1,f(){if(R()<.2){log(L,`会社に副業がばれた。${pick(["始末書を書かされた。","上司に呼び出され、やめると約束した。","住民税の通知で経理に気づかれた。"])}`,"red");add(L,"r",-6);add(L,"j",-4)}else{log(L,`黙って${k}を続けた。小遣い程度にはなった。`);L.assets+=50}}},
+  {t:"やめておく",w:2,f(){log(L,"副業はやめておいた。休日は休むことにした。");add(L,"h",2)}}]}}
+function decHouse(L){const price=wpick([2500,3500,4500,6000],[25,35,25,15]);return{moral:1,title:`${L.partner}が「そろそろ家を買わない？」と言い出した。`,text:`気になっている物件は${price.toLocaleString()}万円。35年ローンなら、払い終わるのは${L.age+35}歳。`,opts:[
+  {t:"買う",w:3,f(){const down=Math.min(Math.max(0,L.assets*.3),price*.2)|0;L.assets-=down;L.debt+=price-down;L.flags.house=1;log(L,`${price.toLocaleString()}万円の${pick(["建売住宅","中古マンション","新築マンション","注文住宅"])}を買った。頭金${down}万円、残りは35年ローン。${pick(["引っ越しの夜、段ボールの上でピザを食べた。","子ども部屋の壁紙を一緒に選んだ。","初めての固定資産税の通知に驚いた。"])}`,"big");add(L,"j",6)}},
+  {t:"賃貸のままにする",w:2,f(){log(L,`家は買わなかった。${pick(["身軽なほうがいいと話し合った。","そのぶん積立投資にまわした。","更新のたびに少し迷う。"])}`);if(R()<.4)L.assets+=200}}]}}
+function decTransfer(L){const to=pick(["札幌","仙台","新潟","名古屋","広島","高松","福岡","鹿児島","那覇","シンガポール"]);const kid=L.kids.find(k=>!k.dead&&L.age-k.born>=6&&L.age-k.born<=17);return{moral:1,title:`${to}への転勤の辞令が出た。期間は3年。`,text:kid?`${kid.n}は${L.age-kid.born}歳。学校の友だちと離れたくないと言っている。`:`${L.partner}にも仕事がある。`,opts:[
+  {t:"家族で引っ越す",w:2,f(){log(L,`家族で${to}に引っ越した。${pick(["最初の冬は寒さに驚いた。","子どもはすぐに方言をしゃべりはじめた。","知り合いが一人もいない土地で、家族の会話が増えた。"])}`,"big");L.flags.partnerWorks=false;add(L,"r",3);add(L,"j",2)}},
+  {t:"単身赴任する",w:2,f(){log(L,`${to}に単身赴任した。週末に帰る生活が3年続いた。${pick(["帰るたび、子どもが少し大きくなっていた。","冷凍のおかずを持たされた。","家族のLINEグループの既読が早くなった。"])}`);L.assets-=100;add(L,"r",-4);add(L,"h",-3)}},
+  {t:"断って、転職を考える",w:1,f(){if(R()<.5){log(L,"辞令を断った。半年後に地元の会社へ転職した。年収は下がった。");L.flags.promo=Math.max(0,(L.flags.promo||0)-.5);add(L,"j",3)}else{log(L,"辞令を断った。出世の道は閉ざされたと、上司にはっきり言われた。","red");L.flags.promo=Math.max(0,(L.flags.promo||0)-1);add(L,"j",-3)}}}]}}
+function decReunion(L){const who=person(L.sex==="M"?"F":"M");return{moral:1,title:`中学の同窓会で、初恋の${who.split(" ")[1]}と再会した。`,text:`二次会のあと、「もう少し話さない？」と言われた。${L.married?L.partner+"には「終電までに帰る」と言ってある。":""}`,opts:[
+  {t:"もう少し話す",w:2,f(){if(L.married&&R()<.12){log(L,`${who.split(" ")[1]}と朝まで話した。それから二人で会うようになり、やがて${L.partner}に知られた。`,"red big");add(L,"r",-12);add(L,"j",-6);if(R()<.4)divorce(L,"同窓会がきっかけで")}else{log(L,`${who.split(" ")[1]}とファミレスで2時間話した。お互い、あの頃のことをほとんど覚えていなかった。${L.married?"終電で帰った。":""}`);add(L,"j",4)}}},
+  {t:"今日は帰る",w:3,f(){log(L,`「また今度」と言って帰った。${pick(["今度は来なかった。","次の同窓会は10年後だった。","帰り道、少しだけ遠回りした。"])}`)}}]}}
+function decPet(L){const a=pick([["柴犬の子犬",30],["保護犬",3],["保護猫",3],["ロシアンブルーの子猫",25],["トイプードル",35]]);return{moral:1,title:`${a[0]}を飼いたいと、${L.kids.some(k=>!k.dead&&L.age-k.born<15)?"子どもに毎日せがまれている":L.married?L.partner+"が言い出した":"ずっと思っている"}。`,text:`寿命は15年ほど。費用は生涯で${200+Math.floor(R()*3)*50}万円と言われる。`,opts:[
+  {t:"飼う",w:3,f(){L.assets-=a[1];L.flags.pet=a[0];L.flags.petAge=L.age;log(L,`${a[0]}を家に迎えた。名前は「${pick(["こむぎ","モカ","ココ","レオ","きなこ","ソラ","ハナ","まる"])}」。`,"big");add(L,"j",7);add(L,"h",2)}},
+  {t:"飼わない",w:2,f(){log(L,"ペットは飼わなかった。"+pick(["旅行に行けなくなるから。","最後を看取る自信がなかった。","賃貸がペット不可だった。"]))}}]}}
+function decUturn(L){return{moral:1,title:`地元の${L.home}にUターンしないかと、母から電話があった。`,text:`「家も空いてるし、こっちのほうが暮らしやすいよ」`,opts:[
+  {t:"地元に戻る",w:1,f(){log(L,`${L.home}に戻った。${pick(["年収は2割下がったが、通勤は10分になった。","昔の友だちと週末に釣りに行くようになった。","親の老いを近くで見ることになった。","車がないとどこにも行けないことを思い出した。"])}`,"big");L.where=L.p.full;add(L,"r",6);add(L,"j",3);L.flags.uturn=1}},
+  {t:"いまの街に残る",w:3,f(){log(L,`「まだこっちでやりたいことがある」と答えた。${pick(["電話の向こうで、母が少し黙った。","正月だけは帰ることにした。","母は「そうだよね」と言った。"])}`)}}]}}
+function decGrandkid(L){const k=L.kids.find(k=>!k.dead);return{moral:1,title:`${k?k.n:"子ども"}から「孫を私立の中学に行かせたい。少し援助してもらえないか」と相談された。`,text:`必要なのは3年間で${300+Math.floor(R()*3)*100}万円。老後の資金は${Math.max(0,L.assets|0)}万円。`,opts:[
+  {t:"出す",w:2,f(){const g=Math.min(Math.max(0,L.assets*.4),400)|0;L.assets-=g;log(L,`孫の学費として${g}万円を出した。${pick(["入学式の写真が送られてきた。","孫から手書きのお礼の手紙が届いた。","子どもに初めて頭を下げられた。"])}`,"big");add(L,"r",8);add(L,"j",4)}},
+  {t:"半分だけ出す",w:2,f(){const g=Math.min(Math.max(0,L.assets*.2),200)|0;L.assets-=g;log(L,`${g}万円だけ出した。「残りは自分たちで頑張ってみる」と言われた。`);add(L,"r",3)}},
+  {t:"断る",w:1,f(){log(L,`「自分たちの老後もあるから」と断った。${pick(["それからしばらく、電話が減った。","子どもは「そうだよね」と言った。","孫は公立の中学に行き、楽しそうにしている。"])}`);add(L,"r",-4)}}]}}
+function decLicense(L){return{moral:1,title:`${L.age}歳。駐車場で、ブレーキとアクセルを一瞬踏み間違えそうになった。`,text:`${L.kids.some(k=>!k.dead)?"子どもから「そろそろ免許を返したら」と言われている。":"車がないと、病院にも買い物にも行けない。"}`,opts:[
+  {t:"免許を返納する",w:2,f(){log(L,`運転免許を返納した。${pick(["最後に、妻と海まで走った。","警察署で運転経歴証明書をもらった。","バスの時刻表を冷蔵庫に貼った。","タクシー代が月に2万円かかるようになった。"])}`,"big");L.flags.noLicense=1;add(L,"j",-2);add(L,"r",3)}},
+  {t:"まだ運転を続ける",w:2,f(){const r=R();if(r<.06){log(L,`スーパーの駐車場で${pick(["店の入口に突っ込んだ。けが人はいなかった。","前の車にぶつけた。","歩行者に接触した。相手は骨折した。"])}その月のうちに免許を返した。`,"red big");L.assets-=100;add(L,"j",-10);add(L,"r",-5);L.flags.noLicense=1}else{log(L,"昼間の近所だけ運転することにした。");add(L,"j",1)}}}]}}
+function decShukatsu(L){return{moral:1,title:`${pick(["友人の葬儀の帰り","テレビの特集を見て","健康診断の結果を見て"])}、終活のことを考えた。`,text:`実家の墓は${L.home}にある。${L.kids.some(k=>!k.dead)?"子どもは別の県に住んでいる。":"継ぐ人はいない。"}`,opts:[
+  {t:"エンディングノートを書く",w:3,f(){log(L,`エンディングノートを書きはじめた。${pick(["「延命治療はしない」と書いた。","銀行口座とパスワードの一覧をつくった。","葬儀で流してほしい曲を書いた。","書いているうちに、いい人生だったと思えてきた。"])}`);L.flags.endnote=1;add(L,"j",3)}},
+  {t:"墓じまいをする",w:1,f(){log(L,`${L.home}の墓じまいをした。費用は${50+Math.floor(R()*5)*20}万円。${pick(["遺骨は樹木葬の霊園に移した。","最後に墓石を磨いた。","親戚に一人だけ反対された。"])}`,"big");L.assets-=100;add(L,"j",2)}},
+  {t:"まだ考えない",w:2,f(){log(L,"「まだ早い」と言って、考えるのをやめた。")}}]}}
+function decDisaster(L){const where=pick(["能登","熊本","東北の沿岸","広島","岡山の倉敷","福島"]);return{moral:1,title:`${where}で大きな災害があった。災害ボランティアを募集している。`,text:"有給休暇は3日残っている。",opts:[
+  {t:"現地に行く",w:2,f(){log(L,`${where}で3日間、泥のかき出しをした。${pick(["帰りのバスで、知らない人と黙っておにぎりを食べた。","家の持ち主のおばあさんが、ずっと頭を下げていた。","アルバムの写真を一枚ずつ洗った。"])}`,"big");add(L,"j",5);add(L,"r",4);add(L,"h",-2)}},
+  {t:"募金だけする",w:3,f(){const g=pick([1,3,5,10]);log(L,`${g}万円を義援金として送った。`);L.assets-=g;add(L,"j",1)}},
+  {t:"何もしない",w:1,f(){log(L,"ニュースを見て、チャンネルを変えた。")}}]}}
 function suspect(L){const x=L.age,sex=L.sex;const c=[
   ["便潜血が陽性","大腸がん",x>=45?3:1],["胸部X線に影","肺がん",x>=50?3:1],["血糖値が高かった","糖尿病",3],["血圧が高かった","高血圧",4],["肝機能の数値が悪かった","脂肪肝・アルコール性肝障害",L.job==="経営者"||L.job==="営業"?3:2],
   ["心電図に異常","不整脈・狭心症",x>=50?2:1],["胃カメラでポリープ","胃がん",x>=50?2:1],["コレステロールが高かった","脂質異常症",3],["尿酸値が高かった","痛風",sex==="M"?2:.5],["腎機能の数値が悪かった","慢性腎臓病",x>=55?2:1],
@@ -2110,7 +2175,7 @@ async function memDetail(id,local){let m,words=[];if(local){m=localMems().find(x
   if($("#wpost"))$("#wpost").onclick=async()=>{const t=$("#wt").value.trim();if(!t)return;$("#wpost").disabled=true;try{const d=await memApi(null,{type:"word",id,n:$("#wn").value.trim(),t});if(d.ok){$("#words").insertAdjacentHTML("afterbegin",`<div style="display:block"><p style="margin:0">${esc(t)}</p><span class="muted" style="font-size:11px">${esc($("#wn").value.trim()||"名無し")}・いま</span></div>`);$("#wt").value=""}}catch(e){}$("#wpost").disabled=false}}
 
 let S={view:"home",challenge:null,speed:4,L:null,others:[],timer:null,dec:null,pause:false,auto:false,breath:null,paths:true,mode:"slow"};
-const MODES={slow:{speed:6.5,auto:false,label:"じっくり人生",desc:"自分で決めながら。1年6.5秒・約10分"},fast:{speed:5,auto:false,label:"サクッと人生",desc:"大事な出来事だけ。約7分"},auto:{speed:2.3,auto:true,label:"全自動人生",desc:"選択も自動。眺めるだけ・約3分"}};
+const MODES={slow:{speed:6.5,auto:false,label:"じっくり人生",desc:"自分で決めながら、すべての出来事を。"},fast:{speed:5,auto:false,brief:true,label:"サクッと人生",desc:"大事な出来事だけ。"},auto:{speed:3.6,auto:true,brief:true,label:"全自動人生",desc:"選択も自動。眺めるだけ。"}};
 function setMode(m){S.mode=m;S.speed=MODES[m].speed;S.auto=MODES[m].auto;try{localStorage.setItem("68man_mode",m)}catch(e){}}
 try{const mm=localStorage.getItem("68man_mode");if(mm&&MODES[mm])setMode(mm)}catch(e){}
 const MEMKEY="68man_mem_v2";
@@ -2231,7 +2296,7 @@ function play(){S.shown=0;clearTimeout(S.revT);S.view="play";const L=S.L;
     <div class="topline"><span class="age num" id="age">0<small>歳</small></span><span class="who">${furi(L.name)}</span><span class="muted" id="where">${L.home}</span><span class="muted" id="jobline"></span></div>
     <div class="lifebar" title="人生の進み"><i id="lifebar" style="width:0%"></i></div>
     ${S.challenge?`<div class="chalbar" id="chalbar"></div>`:""}
-    <div class="ctrl"><div class="seg"><button id="pz" aria-pressed="false" aria-label="一時停止">❚❚</button>${(b=>{const f=MODES.auto.speed,g=t=>+(b*Math.pow(f/b,t)).toFixed(3);const lb=v=>"約"+Math.round(v*84/60)+"分";return b<=f?[[b,lb(b)]]:[[b,lb(b)],[g(1/3),lb(g(1/3))],[g(2/3),lb(g(2/3))],[f,lb(f)]]})(MODES[S.mode].speed).map(([v,t])=>`<button class="spd" data-v="${v}" aria-pressed="${v===S.speed}">${t}</button>`).join("")}</div><button class="chip" id="skip" title="次の大きな出来事まで進む">次へ »</button><button class="chip" id="more" aria-label="その他">⋯</button></div>
+    <div class="ctrl"><div class="seg"><button id="pz" aria-pressed="false" aria-label="一時停止">❚❚</button>${(b=>{const f=MODES.auto.speed,g=t=>+(b*Math.pow(f/b,t)).toFixed(3);return b<=f?[[b,"▶"]]:[[b,"▶"],[g(1/3),"▶▶"],[g(2/3),"▶▶▶"],[f,"最速"]]})(MODES[S.mode].speed).map(([v,t])=>`<button class="spd" data-v="${v}" aria-pressed="${v===S.speed}">${t}</button>`).join("")}</div><button class="chip" id="skip" title="次の大きな出来事まで進む">次へ »</button><button class="chip" id="more" aria-label="その他">⋯</button></div>
     <div class="moremenu" id="moremenu" hidden><button class="chip" id="mode" aria-pressed="${S.auto}">選択もおまかせ</button><button class="chip" id="bgm" aria-pressed="${BGM.on}">♪ 音楽</button><button class="chip" id="quit">この人生をやめる</button></div>
   </div>
   ${(()=>{try{return localStorage.getItem("68man_tip1")?"":`<div class="tip" id="tip">速く進めたいときは 2× か 6× を。「次へ」で次の大きな出来事まで飛ばせます。大切な決断が来ると、時間が止まります。<button id="tipx" aria-label="閉じる">×</button></div>`}catch(e){return""}})()}
@@ -2280,10 +2345,10 @@ function showBreath(a){
   $("#bn").onclick=()=>{const v=$("#bt").value.trim();if(v){S.L.notes.push({a,t:v});S.L.events.push({a,t:"「"+v+"」",cls:"note"})}S.breath=null;$("#dec").innerHTML="";render()};
 }
 function jobLine(L){const a=L.age;if(a<15)return"";if(L.hs&&a<18)return L.hs.name;if(L.univ&&a<L.univGrad)return`${L.univ.name} ${L.fac}`;if(L.prison)return"服役中";if(L.job)return`${L.job}${L.company?"・"+L.company:""}`;return""}
-function visEvents(){const L=S.L;const evs=L.events.filter(e=>e.t);return S.speed<1?evs.filter(e=>/big|red|note/.test(e.cls)||e.a<=1):evs}
+function visEvents(){const L=S.L;const evs=L.events.filter(e=>e.t);return (MODES[S.mode]||{}).brief?evs.filter(e=>/big|red|note/.test(e.cls)||e.a<=1):evs}
 function renderLog(){const L=S.L;if(!$("#log"))return;const evs=visEvents();if(S.shown==null||S.shown>evs.length)S.shown=evs.length;const vis=evs.slice(0,S.shown);$("#log").innerHTML=vis.slice().reverse().map((e,i)=>`<div class="ev ${e.cls}${i===0&&S._lastN!==vis.length?" new":""}"><span class="a">${e.a}歳</span><p>${esc(e.t)}</p></div>`).join("");S._lastN=vis.length}
 function revealAll(){S.shown=visEvents().length;clearTimeout(S.revT)}
-function revealNew(){const L=S.L;const total=visEvents().length;if(S.shown==null)S.shown=total;const n=total-S.shown;if(n<=0)return;clearTimeout(S.revT);const gap=Math.max(S.speed<1?90:180,Math.min(1600,S.speed*1000/(n+1)));const step=()=>{if(!S.L||S.L!==L)return;if(S.shown<total){S.shown++;renderLog();if(S.shown<total)S.revT=setTimeout(step,gap)}};S.revT=setTimeout(step,Math.min(gap,400))}
+function revealNew(){const L=S.L;const total=visEvents().length;if(S.shown==null)S.shown=total;const n=total-S.shown;if(n<=0)return;clearTimeout(S.revT);const gap=Math.max((MODES[S.mode]||{}).brief?90:180,Math.min(1600,S.speed*1000/(n+1)));const step=()=>{if(!S.L||S.L!==L)return;if(S.shown<total){S.shown++;renderLog();if(S.shown<total)S.revT=setTimeout(step,gap)}};S.revT=setTimeout(step,Math.min(gap,400))}
 function sceneCaption(L){const sc=sceneOf(L);const bg={city:"都会",town:"地方の町",snow:"雪国の町",sea:"海の近く",field:"田畑のある村",abroad:"海外",room:"家の中",cell:"刑務所"}[sc.bg];const fam=L.age<18?`${L.flags.single?"母":"両親"}${L.sibs.filter(b=>b.d<0||L.age>=b.d).length?"ときょうだい"+L.sibs.filter(b=>b.d<0||L.age>=b.d).length+"人":""}と一緒に`:L.married?`${L.partner}${L.kids.filter(k=>!k.dead).length?"と子ども"+L.kids.filter(k=>!k.dead).length+"人":""}と`:L.kids.some(k=>!k.dead)?"子どもと":"ひとりで";return `${esc(L.where)}・${bg}・${L.flags.home?"持ち家":"借家"}・${esc(fam)}`}
 function render(){const L=S.L;if(!$("#age"))return;if($("#famkv")){const rows=[];if(L.age<25||!L.married){rows.push(["母",`${L.momAge+L.age}歳`,L.flags.momDead?"亡くなった":L.momJob]);if(!L.flags.single)rows.push(["父",`${L.dadAge+L.age}歳`,L.flags.parentDead?"亡くなった":L.parentJob])}if(L.married)rows.push(["配偶者",esc(L.partner),""]);if(L.kids.length)rows.push(["子ども",L.kids.filter(k=>!k.dead).map(k=>esc(k.n)+`（${L.age-k.born}歳）`).join("、")||"―",""]);rows.push(["きょうだい",L.sibs.filter(b=>b.d<0||L.age>=b.d).length+"人",""]);rows.push(["住まい",L.flags.home?"持ち家":"借家",esc(L.where)]);$("#famkv").innerHTML=rows.map(r=>`<div><span>${r[0]}</span><b>${r[1]}</b>${r[2]?`<small>${esc(r[2])}</small>`:""}</div>`).join("")}if($("#livescene")&&(S._sceneAge!==L.age)){S._sceneAge=L.age;try{const sc=sceneOf(L);if(L.age<18){sc.ppl=[{k:"c",s:L.sex,seed:hash32(L.name)}];if(!L.flags.single)sc.ppl.unshift({k:"a",s:"M",seed:hash32(L.dad||"d")});sc.ppl.unshift({k:"a",s:"F",seed:hash32(L.mom||"m")});L.sibs.filter(b=>b.d<0||L.age>=b.d).slice(0,3).forEach(b=>sc.ppl.push({k:"c",s:b.s,seed:hash32(b.n||"s")}))}drawScene($("#livescene"),sc);$("#scenecap").innerHTML=sceneCaption(L)}catch(e){}}if($("#lifebar"))$("#lifebar").style.width=Math.min(100,L.age)+"%";if($("#chalbar")&&S.challenge){const c=CHALLENGES.find(c=>c.id===S.challenge);const p=c.prog(L);$("#chalbar").innerHTML=`<span>チャレンジ：${c.name}</span><i><b style="width:${Math.round(p*100)}%"></b></i><span>${p>=1?"達成":Math.round(p*100)+"%"}</span>`}
   $("#age").innerHTML=`${L.age}<small>歳</small><small style="margin-left:8px;color:var(--sub)">${L.birthYear+L.age}年</small>`;$("#where").textContent=L.where===L.home?L.home+L.city:`${L.home}${L.city}生まれ・${L.where}暮らし`;$("#jobline").textContent=jobLine(L);
