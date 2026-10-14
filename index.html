@@ -1127,6 +1127,7 @@ function stepYear(L){
   if(x>=9&&x<=14&&!F.sawBully&&R()<.07){F.sawBully=1;return decSeeBully(L)}
   if(x>=20&&x<=65&&!F.wallet&&R()<.02){F.wallet=1;return decWallet(L)}
   if(x>=15&&x<=17&&!F.cheat&&R()<.05){F.cheat=1;return decCheat(L)}
+  if(x===17&&L.edu!=="中卒"&&L.edu!=="高校中退"&&!F.examCheat&&R()<.06){F.examCheat=1;return decExamCheat(L)}
   if(x>=24&&x<=60&&!F.guarantor&&R()<.012){F.guarantor=1;return decGuarantor(L)}
   if(x>=30&&x<=60&&L.job&&JOBS[L.job]&&JOBS[L.job].reg&&!F.whistle&&R()<.012){F.whistle=1;return decWhistle(L)}
   if(x>=26&&x<=50&&!F.scout&&R()<.012){F.scout=1;return decScout(L)}
@@ -1178,6 +1179,7 @@ function stepYear(L){
   else if(x===18&&L.hs&&/高専/.test(L.hs.name)&&!L.univ){log(L,`高専は5年制。同級生が受験の話をしている横で、${pick(["卒業研究のテーマを決めた。","ロボコンの地区大会に出た。","インターンで工場に2週間通った。"])}`);}
   else if(x===20&&L.hs&&/高専/.test(L.hs.name)&&!L.univ&&!L.flags.kosenDone){L.flags.kosenDone=1;const d=devOf(L);if(d>=50&&R()<.45){const pool=univPool(L).filter(u=>u.type==="国公立"&&u.dev>=48&&u.dev<=Math.max(58,d+6)&&!/教育|外国語|女子|医科|医療|芸術|経済|商科|看護|福祉|体育|農業|水産|海洋|薬科|保健|文化|県立大学|市立大学|公立大学/.test(u.name));const u=pool.length?pick(pool):{name:pick(["長岡技術科学大学","豊橋技術科学大学"]),dev:52,type:"国公立"};L.univ={name:u.name,dev:u.dev,type:u.type};L.fac="工学部";L.track="理";L.flags.kosenTransfer=1;L.edu="大学";log(L,`${L.hs.name}を卒業し、${u.name}工学部の3年次に編入した。（＋５）`,"big");add(L,"k",5)}
     else{L.edu="高専";L.job=pick(["システムエンジニア","機械組立工","電気工事士","研究者","システムエンジニア"]);L.company=compOf(L.job,L);log(L,`${L.hs.name}を卒業し、${L.company}に${L.job}として就職した。高専卒の求人倍率は20倍を超えていた。`,"big");add(L,"j",4)}}
+  else if(x===18&&L.edu!=="中卒"&&L.edu!=="高校中退"&&F.examBan){F.examBan=0;F.ronin=1;F.yobi=F.yobi||pick(["駿台","河合塾","代ゼミ","地元の予備校"]);log(L,`その年の大学受験は、どこも受けられなかった。春から${F.yobi}に通い始めた。`,"red")}
   else if(x===18&&L.edu!=="中卒"&&L.edu!=="高校中退")return dec18(L);
   if(x>=19&&x<=26&&F.ronin){F.ronin=0;log(L,pick([`${F.yobi}の夏の模試でE判定が出て、机に突っ伏した。`,`${F.yobi}で同じ志望校の友人ができ、毎日自習室に通った。`,`${F.yobi}の自習室が閉まるまで毎日残った。`,"浪人の夏、受験と関係ない小説ばかり読んでいた。"]));return dec18(L,true)}
   if(x===20&&L.univ)log(L,pick(["サークルの飲み会で初めて二日酔いになった。","居酒屋でバイトを始めた。","初めて一人暮らしをした。","留学に行った。"]));
@@ -1390,6 +1392,9 @@ function decGamble(L){const g=pick(["パチンコ","競馬","オンラインカ�
 function decSeeBully(L){const v=person(L.sex).split(" ")[1];return{moral:1,title:`クラスの${v}がいじめられている。`,text:"自分は標的ではない。",opts:[
   {t:"助ける",s:"次の標的になるかもしれない",w:1,f(){if(R()<.5){log(L,`${v}をかばった。それ以来、${v}とは親友になった。`);add(L,"r",8);add(L,"j",5)}else{log(L,`${v}をかばったら、今度は自分が標的になった。`,"red");L.flags.bully=1;add(L,"j",-10)}}},
   {t:"助けない",s:"見て見ぬふりをする",w:2,f(){log(L,`見て見ぬふりをした。${v}は転校した。大人になっても、ときどき思い出す。`,"red");add(L,"j",-4)}}]}}
+function decExamCheat(L){const how=pick([["袖の中にスマホを隠し、問題を撮ってSNSで解答を募る","試験中にスマホを操作しているのを監督者に見られた"],["消しゴムのカバーの裏に公式と年号を書き込む","休憩中の持ち物確認で、消しゴムのカバーを外された"],["スマートウォッチに単語を入れておく","「時計を外してください」と言われ、画面に単語が光っていた"],["隣の受験生の答案を盗み見る","監督者に何度も首の向きを注意され、別室に呼ばれた"]]);return{moral:1,title:"大学入試まであと3か月。模試の判定は、ずっとD判定のまま。",text:`ネットで「${how[0]}」方法を見つけた。`,opts:[
+  {t:"やる",s:"本番で試す",w:1,f(){if(R()<.6){log(L,`共通テスト本番。${how[1]}。`,"red big");log(L,"不正行為と認定され、その年の全科目の成績が無効になった。試験場の外で、親が待っていた。","red big");L.flags.examBan=1;L.flags.cheatCaught=1;add(L,"j",-15);add(L,"r",-6)}else{log(L,"本番で使った。バレなかった。点数は少しだけ上がった。誰にも言っていない。");add(L,"k",3);add(L,"j",-3)}}},
+  {t:"やらない",s:"残り3か月、自力でやる",w:4,f(){log(L,"画面を閉じて、過去問を1年分解いた。");add(L,"k",3)}}]}}
 function decCheat(L){const v=pick(["佐藤","高橋","伊藤","中村","小林"]);return{moral:1,title:`期末テスト前日、${v}から「答案、手に入った」とLINEが来た。`,text:"",opts:[
   {t:"見る",s:"答えを写真で受け取る",w:2,f(){if(R()<.35){log(L,`答案の流出がバレて、${v}と一緒に職員室に呼ばれた。親が学校に来た。`,"red");add(L,"j",-6);add(L,"k",-3)}else{log(L,"その教科だけ学年10位になった。誰にも言っていない。");add(L,"j",-1)}}},
   {t:"見ない",s:"既読だけつけて閉じる",w:3,f(){log(L,`見なかった。翌週、${v}たち5人が停学になった。`);add(L,"j",2)}}]}}
