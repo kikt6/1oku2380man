@@ -835,7 +835,7 @@ function eraFx(y){const f={inc:1,cost:1,asset:0,ice:0,note:null};
   if(y===2020)f.ice=.1;
   if(y>=2022&&y<=2025)f.cost=1.06;
   return f}
-function log(L,t,cls){if(!L._seen)L._seen=new Set();if(L._seen.has(t)&&!/big/.test(cls||"")){if(R()<.85)return}const y=yearOf(L);if(y<2026&&!eraOK(t,y)){if(!/big|red/.test(cls||""))return;t=eraFix(t,y)}L._seen.add(t);L.events.push({a:L.age,t,cls:cls||""})}
+function log(L,t,cls){if(!L._seen)L._seen=new Set();if(L._seen.has(t)){if(R()<(/big/.test(cls||"")?.8:.97))return}const lastE=L.events[L.events.length-1];if(lastE&&lastE.t===t)return;const y=yearOf(L);if(y<2026&&!eraOK(t,y)){if(!/big|red/.test(cls||""))return;t=eraFix(t,y)}L._seen.add(t);L.events.push({a:L.age,t,cls:cls||""})}
 function eraFix(t,y){if(y<2008)t=t.replace(/スマホ/g,y<1996?"電話":"携帯").replace(/LINE/g,"電話").replace(/YouTube|TikTok|インスタ|Twitter|SNS/g,y<1997?"テレビ":"ネット").replace(/マッチングアプリ/g,"お見合い").replace(/メルカリ/g,"リサイクルショップ");if(y<2021)t=t.replace(/共通テスト/g,exam名(y));return t}
 const devOf=L=>Math.max(35,Math.min(78,Math.round(50+(L.st.k-62)*.55+(L.home5-3)*1.5+(L.devLuck||0))));
 function marHazard(sex,x){if(x<18||x>60)return 0;const m=MARAGE[sex],sd=5.5;
@@ -854,7 +854,7 @@ function yearIncome(L){const J=JOBS[L.job];if(!J||!L.job)return 0;
   if(J.vol)v*=Math.max(.1,1+gauss()*.6);
   if(L.age>=65&&!J.vol)v*=.55;
   return Math.round(v)}
-function livingCost(L){let c=140+L.income*.45;if(L.where==="東京都")c+=30;if(L.married)c+=70;if(L.age>=65)c-=40;c+=L.kids.filter(k=>L.age-k.born<22).length*(L.univ?110:85);return c}
+function livingCost(L){let c=120+L.income*.5+(L.income>800?(L.income-800)*.15:0);if(L.where==="東京都")c+=30;if(L.married)c+=60;if(L.age>=65)c-=50;c+=L.kids.filter(k=>L.age-k.born<22).length*(L.univ?110:85);return c}
 function money(L){
   const EY=yearOf(L),EF=eraFx(EY);
   L.income=Math.round(yearIncome(L)*EF.inc);L.lifetime+=L.income;
@@ -910,12 +910,12 @@ function romance(L){const x=L.age,F=L.flags,ps=L.sex==="M"?"F":"M";if(L.married|
   if(R()<.08&&x<40&&L.exes){log(L,`元恋人から「元気？」とLINEが来た。${pick(["返さなかった。","会ってしまった。","友だちとして一度飲んだ。"])}`)}
 }
 function stepYear(L){
-  const x=L.age,p=L.p,F=L.flags;romance(L);if(R()<.4){const pool=x<=12?FLAVOR.kid:x<=18?FLAVOR.teen:x<=29?FLAVOR.young:x<=54?FLAVOR.mid:FLAVOR.old;const t=pick(pool);const office=/会社|上司|同期|給料|部下|昇給|ボーナス|社員/.test(t);const kidsy=/子ども|孫|運動会で、父|授業参観/.test(t);if(!(office&&!(JOBS[L.job]&&JOBS[L.job].reg))&&!(kidsy&&!L.kids.length))log(L,t)}if(F.gamble&&R()<.3)log(L,pick(FLAVOR.pachinko));if(L.job&&JOBFLAVOR[L.job]&&!L.prison&&R()<.3)log(L,pick(JOBFLAVOR[L.job]));{const yt=yearText(L);if(yt&&R()<.7)log(L,yt,"note");else if(x>=6&&R()<.3)log(L,pick(NEWS),"note")}
+  const x=L.age,p=L.p,F=L.flags;romance(L);if(R()<.4){const pool=x<=12?FLAVOR.kid:x<=18?FLAVOR.teen:x<=29?FLAVOR.young:x<=54?FLAVOR.mid:FLAVOR.old;const t=pick(pool);const office=/会社|上司|同期|給料|部下|昇給|ボーナス|社員/.test(t);const kidsy=/子ども|孫|息子|娘|運動会で、父|授業参観/.test(t);if(!(office&&!(JOBS[L.job]&&JOBS[L.job].reg))&&!(kidsy&&!L.kids.length))log(L,t)}if(F.gamble&&R()<.3)log(L,pick(FLAVOR.pachinko));if(L.job&&JOBFLAVOR[L.job]&&!L.prison&&R()<.3){const jt=pick(JOBFLAVOR[L.job]);if(!(/息子|娘|子ども|孫/.test(jt)&&!L.kids.length)&&!(/(妻|夫)（|夫（妻）|妻（夫）/.test(jt)&&!L.married))log(L,jt)}{const yt=yearText(L);if(yt&&R()<.7)log(L,yt,"note");else if(x>=6&&R()<.3)log(L,pick(NEWS),"note")}
   if(L.birthYear+x===2020&&x>=6&&x<=22)log(L,pick(["一斉休校で3か月家にいた。","卒業式が中止になった。","オンライン授業で、画面の前で寝落ちした。","入学式がなかった。","修学旅行が中止になった。"]),"red");if(L.birthYear+x===2020&&x>=23&&L.job&&R()<.5)log(L,pick(["在宅勤務になり、通勤がなくなった。","10万円の給付金で冷蔵庫を買った。","飲み会がなくなって、少し楽になった。"]));
   const f=L.focus; add(L,f,2.2);
   if(x<20)add(L,"k",1.2*(L.home5/3)); if(x>60)add(L,"h",-.5-(x-60)*.02); if(x>40)add(L,"h",-.4);
   {const base=50+(L.st.r-50)*.3+(L.st.h-50)*.2+(L.assets-L.debt>1000?4:L.assets-L.debt<0?-6:0)+(L.married?3:0)+(L.kids.length?2:0)+(x>=23&&x<65?(L.job==="無職"||L.job==="フリーター"?-7:JOBS[L.job]&&JOBS[L.job].reg?2:0):0)+(L.prison?-15:0);add(L,"j",(base-L.st.j)*.15+gauss()*1.5)}
-  if(L.prison){L.prison--;if(L.prison>=30&&R()<.05){L.alive=false;L.cause="獄中で";log(L,`刑務所の中で亡くなった。${x}歳。`,"red big");return null}if(L.prison&&R()<.15)log(L,pick(["刑務所の工場で木工をした。","面会に来たのは母だけだった。","仮釈放の審査に落ちた。","同じ房の男と口をきかずに1年過ごした。"]),"red");if(!L.prison){log(L,`刑期を終えて出所した。${x}歳。${pick(["迎えは誰もいなかった。","母が迎えに来ていた。","出所後、住む場所を探すのに半年かかった。","前科があると、面接で落ち続けた。"])}`);L.job="フリーター"}}
+  if(L.prison>0){L.prison=Math.max(0,L.prison-1);if(L.prison>=30&&R()<.05){L.alive=false;L.cause="獄中で";log(L,`刑務所の中で亡くなった。${x}歳。`,"red big");return null}if(L.prison&&R()<.15)log(L,pick(["刑務所の工場で木工をした。","面会に来たのは母だけだった。","仮釈放の審査に落ちた。","同じ房の男と口をきかずに1年過ごした。"]),"red");if(!L.prison){log(L,`刑期を終えて出所した。${x}歳。${pick(["迎えは誰もいなかった。","母が迎えに来ていた。","出所後、住む場所を探すのに半年かかった。","前科があると、面接で落ち続けた。"])}`);L.job="フリーター"}}
   // 死亡
   let q=qOf(L.lt.a,x,L.lt.q0)*(x>0&&L.st.h<30?1+(30-L.st.h)/100:1);
   if(JOBS[L.job]&&JOBS[L.job].risk)q*=1.15; if(L.job==="暴力団員")q*=2.5; if(L.st.j<15&&x>12)q*=1.6;
@@ -1090,7 +1090,7 @@ function stepYear(L){
       log(L,nx==="解説者"?"引退後、解説者になった。":nx==="コーチ"?"引退後、古巣の2軍コーチになった。":nx==="球団職員"?"引退後、球団職員としてスカウトの手伝いをした。":nx==="高校教員"?"母校で指導者になった。":nx==="経営者"?"引退後、焼肉屋を開いた。":nx==="営業"?"引退後、スポンサー企業に営業として就職した。":nx==="警備員"?"引退後、仕事が見つからず、警備員になった。":"引退後、トラック運転手になった。")}}
   if(L.job==="経営者"&&R()<.15){const r=R();if(r<.3){log(L,`会社が${pick(["大手に買収された","上場した"])}。`,"big");L.assets+=2000+Math.floor(R()*8000);L.job="経営者"}else if(r<.5){log(L,"資金繰りに行き詰まり、会社をたたんだ。","red");L.job="フリーター";L.debt+=500}}
   // ===== 結婚・家族 =====
-  if(!L.married&&x>=18&&x<60&&!F.pendMar){const h=marHazard(L.sex,x)*(0.42+L.st.r/100)*(L.divorced?.5:1)*(L.job==="暴力団員"?.5:1)*(L.lover?(x-L.lover.since>=2?2.5:1.3):.5);if(R()<h)return decMarry(L)}
+  if(!L.married&&x>=18&&x<60&&!F.pendMar){const h=marHazard(L.sex,x)*(0.44+L.st.r/100)*(L.divorced?.5:1)*(L.job==="暴力団員"?.5:1)*(L.lover?(x-L.lover.since>=2?2.5:1.3):.5);if(R()<h)return decMarry(L)}
   if(L.married&&L.kidsPlan>L.kids.length){const momAge=L.sex==="F"?x:x-2;if(momAge<44&&R()<.38){const ks=R()<.51?"M":"F";L.kids.push({n:given(ks),s:ks,born:x});log(L,`${L.kids.length===1?"第一子":"第"+L.kids.length+"子"}が生まれた。${ks==="M"?"男の子":"女の子"}、${L.kids[L.kids.length-1].n}。`,"big");add(L,"j",6)}}
   if(!F.ins&&x>=25&&(L.married||x>=32)&&L.job&&R()<.3){F.ins=1;L.insPrem=L.kids.length?24:12;log(L,`${pick(["日本生命","第一生命","明治安田生命","住友生命","県民共済"])}の生命保険に入った。月${Math.round(L.insPrem/12*10)/10}万円。`)}
   if(F.ins&&x<70)L.assets-=L.insPrem;
@@ -1160,16 +1160,18 @@ function stepYear(L){
     let amt=+((ev[0].match(/(\d+)万円/)||[0,0])[1]);if(x>=65&&/特殊詐欺|投資の先生/.test(ev[0])&&R()<.4){amt=Math.max(amt,Math.round(Math.max(0,L.assets)*(.7+R()*.3)));log(L,`${ev[0]}被害額は${amt}万円。老後の蓄えがほぼ消えた。`,"red big")}else log(L,ev[0]+(amt?`被害額${amt}万円。`:""),"red");L.assets-=amt;add(L,"j",-6);
     if(amt>=200&&L.married&&R()<.3)divorce(L,"だまされたことを責められ続け、");if(amt>=200&&L.kids.length&&R()<.3){log(L,`${L.kids[0].n}に「なんで相談しなかったの」と言われ、それきり疎遠になった。`,"red");add(L,"r",-10)}
     if(/空き巣|殴られた/.test(ev[0])&&R()<.03){L.alive=false;L.cause="事件に巻き込まれて";log(L,`${/空き巣/.test(ev[0])?"鉢合わせた強盗に刺され":"殴られて倒れた際に頭を打ち"}、亡くなった。${x}歳。`,"red big");return null}}
-  if(x>=16&&x<=60&&!L.prison&&R()<(F.bad?.03:L.assets<-500?.012:.003)){const c=wpick([["飲酒運転で検挙され、免許取り消し。罰金50万円。",x>=20&&F.car?3:0,0,50],["スピード違反で免停になった。",F.car?3:0,0,8],["万引きで捕まった。初犯で微罪処分だったが、店に出禁になった。",2,0,0],["酔ってけんかになり、傷害で現行犯逮捕。示談金100万円で不起訴。",L.sex==="M"?2:.5,0,100],["闇バイトの「受け子」をやって逮捕された。詐欺罪で懲役3年。",x<30&&L.assets<-300?3:.2,3,0],["会社の金を横領していたのが発覚。業務上横領で懲役2年、執行猶予4年。会社は解雇。",L.job==="一般事務"||L.job==="経営者"?1.5:.3,0,300],["大麻所持で逮捕された。大学は退学になった。",x<25?1:.2,0,0],["無免許運転で捕まった。",x<20?2:.2,0,30],["痴漢で逮捕された。会社は解雇、妻とは離婚した。",L.sex==="M"&&x>=25?.7:0,0,100],["電車で寝過ごして終点で起こされ、駅員に絡んで建造物侵入で任意同行。",1,0,0],
+  if(x>=16&&x<=60&&!L.prison&&R()<(F.bad?.03:L.assets<-500?.012:.003)){const c=wpick([["飲酒運転で検挙され、免許取り消し。罰金50万円。",x>=20&&F.car?3:0,0,50],["スピード違反で免停になった。",F.car?3:0,0,8],["万引きで捕まった。初犯で微罪処分だったが、店に出禁になった。",2,0,0],["酔ってけんかになり、傷害で現行犯逮捕。示談金100万円で不起訴。",L.sex==="M"?2:.5,0,100],["闇バイトの「受け子」をやって逮捕された。詐欺罪で懲役3年。",x<30&&L.assets<-300?3:.2,3,0],["会社の金を横領していたのが発覚。業務上横領で懲役2年、執行猶予4年。会社は解雇。",L.job==="一般事務"||L.job==="経営者"?1.5:.3,0,300],["大麻所持で逮捕された。大学は退学になった。",x<25?1:.2,0,0],["無免許運転で捕まった。",x<20?2:.2,0,30],[`痴漢で逮捕された。会社は解雇${L.married?"、"+(L.sex==="M"?"妻":"夫")+"とは離婚した":""}。`,L.sex==="M"&&x>=25?.7:0,0,100],["電車で寝過ごして終点で起こされ、駅員に絡んで建造物侵入で任意同行。",1,0,0],
       [`${L.married?"配偶者":"交際相手"}への暴力で逮捕された。保護命令が出た。`,L.married||L.lover?.6:0,0,0],["元交際相手につきまとい、ストーカー規制法違反で逮捕された。",L.exes?.5:0,0,0],["ネットで知り合った未成年に会い、逮捕された。実名で報道され、全部失った。",x>=20?.3:0,2,0],
       ["強制性交等の容疑で逮捕された。懲役5年の実刑。",.25,5,300],["口論の末に相手を刺し、殺人未遂で逮捕された。懲役8年。",.25,8,500],["交際相手を監禁したとして逮捕された。",.15,3,0],["殺人で逮捕された。無期懲役。",.08,40,0],["横領した金で豪遊していたのがばれ、懲役4年。",L.job==="銀行員"||L.job==="一般事務"?.5:.1,4,2000],["放火で逮捕された。",.1,6,0],["特殊詐欺グループの「かけ子」をして逮捕された。",x<30&&L.assets<-300?1.5:.1,4,0],["飲食店で無銭飲食を繰り返し、常習で起訴された。",L.assets<-800?1:.1,1,0]],[]);
     if(/飲酒運転/.test(c[0])){const r=R();if(r<.08){L.alive=false;L.cause="飲酒運転の事故";log(L,`飲酒運転で電柱に衝突し、亡くなった。${x}歳。`,"red big");return null}if(r<.2){log(L,"飲酒運転で歩行者をはね、死なせた。危険運転致死で懲役6年。被害者遺族への賠償は8000万円、保険は下りなかった。","red big");L.prison=6;L.job="服役中";L.company="";L.assets-=8000;if(L.married&&R()<.7)divorce(L,"事件のあと、");add(L,"j",-30);return null}}
-    log(L,c[0],"red big");L.assets-=c[3];add(L,"j",-12);add(L,"r",-8);if(c[1]>=5){log(L,pick(["実名で報道された。母は近所を歩けなくなった。","被害者遺族に手紙を書いたが、返事はなかった。","裁判には誰も傍聴に来なかった。"]),"red");add(L,"j",-15)}if(c[1]&&L.married&&R()<(c[1]>=5?.9:.5))divorce(L,"服役中に、");if(c[1]&&L.kids.length&&R()<.5){log(L,`${L.kids[0].n}は面会に来なかった。`,"red");add(L,"r",-10)}if(c[1]){L.prison=c[1];L.job="服役中";L.company=""}if(/解雇/.test(c[0])){L.job="無職";L.company="";if(/離婚/.test(c[0])&&L.married)divorce(L,"逮捕が原因で")}if(/退学/.test(c[0])&&L.univ){L.edu="大学中退";L.flags.dropUniv=L.univ;L.univ=null;L.job="フリーター";L.flags.afterGrad=null;L.flags.grad=0}if(/免許取り消し|免停/.test(c[0]))F.car=0}
+    log(L,c[0],"red big");L.assets-=c[3];add(L,"j",-12);add(L,"r",-8);if(c[2]>=5){log(L,pick(["実名で報道された。母は近所を歩けなくなった。","被害者遺族に手紙を書いたが、返事はなかった。","裁判には誰も傍聴に来なかった。"]),"red");add(L,"j",-15)}if(c[2]&&L.married&&R()<(c[2]>=5?.9:.5))divorce(L,"服役中に、");if(c[2]&&L.kids.length&&R()<.5){log(L,`${L.kids[0].n}は面会に来なかった。`,"red");add(L,"r",-10)}if(c[2]){L.prison=c[2];L.flags.lastJob=L.job;L.job="服役中";L.company=""}if(/解雇/.test(c[0])){L.job="無職";L.company="";if(/離婚/.test(c[0])&&L.married)divorce(L,"逮捕が原因で")}if(/退学/.test(c[0])&&L.univ){L.edu="大学中退";L.flags.dropUniv=L.univ;L.univ=null;L.job="フリーター";L.flags.afterGrad=null;L.flags.grad=0}if(/免許取り消し|免停/.test(c[0]))F.car=0}
   if(x>=40&&x%5===0&&R()<.25){const sus=suspect(L);log(L,`健康診断で${sus[0]}。${sus[1]}の疑いで再検査になった。`);return decHealth(L,sus)}
   if(x>=45&&R()<.012){log(L,pick(["胃がんが見つかり、手術を受けた。","脳梗塞で倒れ、左半身に麻痺が残った。","糖尿病と診断された。","心筋梗塞で緊急搬送された。"]),"red");add(L,"h",-20);if(F.ins){log(L,`保険から一時金${100+Math.floor(R()*200)}万円がおりた。`);L.assets+=150}else{log(L,"高額療養費制度を使っても、自己負担が30万円ほどかかった。");L.assets-=30}if(L.st.h<35)add(L,"j",-10)}
   if(x>=55&&x<=80&&F.parentDead&&!F.momDead&&R()<.1){F.momDead=1;log(L,`母の${L.mom}を看取った。${L.momAge+x}歳だった。`,"note");add(L,"j",-6)}
   if(x>=50&&x<=70&&!F.parentDead&&R()<.08){F.parentDead=1;const inh=[0,0,300,1200,3500][L.home5-1]+Math.floor(R()*500);log(L,`父の${L.dad}を看取った。${L.dadAge+x}歳だった。${inh?`${inh}万円を相続した。`:""}`,"note");L.assets+=inh;add(L,"j",-6);if(R()<.2){log(L,"相続をめぐって兄弟と絶縁した。","red");add(L,"r",-10)}}
   if(x>=55&&x<=65&&R()<.03){log(L,"親の介護のために離職した。","red");L.job="無職";add(L,"j",-8)}
+  if(L.job==="フリーター"&&x>=22&&x<=42&&!L.prison&&!L.flags.geino&&!L.flags.influ&&!L.flags.gamer&&R()<(L.st.r>60?.12:.08)){const nj=L.univ?pick(["営業","一般事務","システムエンジニア","公務員","販売店員"]):pick(["販売店員","介護職員","営業","機械組立工","警備員","調理師","トラック運転手","一般事務"]);L.job=nj;L.company=compOf(nj,L);log(L,pick([`バイト先の${L.company}で「正社員にならないか」と誘われ、${nj}になった。`,`ハローワークで紹介された${L.company}に${nj}として採用された。${x}歳、初めての正社員。`,`友人の紹介で${L.company}に入った。${nj}。手取りは少し減ったが、社会保険がついた。`]),"big");add(L,"j",6)}
+  if(x===65&&(L.job==="フリーター"||L.job==="派遣社員")&&!L.retired){L.retired=true;L.flags.lastJob=L.job;L.job="無職";log(L,`65歳。バイトを辞め、年金で暮らすことにした。${L.lifetime<4000?"国民年金だけで、月6万円。":"月10万円ほどだった。"}`)}
   if(x===65&&L.job&&JOBS[L.job].reg){L.retired=true;log(L,`定年を迎えた。退職金${L.company?1500+Math.floor(R()*1500):600}万円。`,"big");L.assets+=L.company?1500+Math.floor(R()*1500):600;L.flags.lastJob=L.job;L.job=R()<.5?"無職":L.job;if(L.job!=="無職")log(L,"再雇用で働き続けることにした。")}
   if(x>=35&&x<=60&&R()<.03)log(L,pick(["PTA会長を押しつけられた。1年で5kg痩せた。","町内会の役員になり、祭りの寄付集めで休日が消えた。","子どもの少年野球のコーチを頼まれ、毎週末グラウンドにいた。","マンションの管理組合の理事長になった。修繕積立金で揉めた。","市議会議員選挙に出た。"+(R()<.3?"最下位で当選した。":"落選した。供託金30万円が没収された。"),"消防団に入った。年に3回、朝まで飲んだ。","地元のマラソン大会の運営を手伝った。"]));
   if(/最下位で当選した/.test(L.events[L.events.length-1].t)&&!F.giin){F.giin=1;L.flags.prevJob=L.job;L.job="公務員";L.company="市議会議員";log(L,"市議会議員になった。議員報酬は月40万円。4年後の選挙で落ちた。","big")}
@@ -1283,7 +1285,7 @@ function dec18(L,ronin){const p=L.p,d=devOf(L)+(L.hs?Math.round((L.hs.dev-55)*.2
     L.job=kind==="工"?pick(["機械組立工","電気工事士","自動車整備士","建設作業員","機械組立工"]):kind==="商"?pick(["一般事務","販売店員","一般事務"]):kind==="農"?pick(["農業","販売店員","調理師"]):kind==="高専"?pick(["システムエンジニア","機械組立工","研究者"]):pick(["販売店員","建設作業員","介護職員","トラック運転手","警備員","調理師","フリーター"]);if(L.job==="農業"){L.job="経営者";L.company="実家の農家"}
     {const EF=eraFx(yearOf(L));if(EF.ice&&L.job!=="フリーター"&&L.company!=="実家の農家"&&R()<EF.ice){L.job="フリーター";log(L,yearOf(L)<2005?"就職氷河期。求人票が去年の半分しかなかった。":yearOf(L)<2011?"リーマン・ショックの翌年で、高卒の求人が激減していた。":"コロナ禍で採用が止まっていた。","red")}}
     const out=R()<p.out/100;if(out)L.where=pick(["東京都","大阪府","愛知県"]);if(L.company!=="実家の農家")L.company=L.job==="フリーター"?"":compOf(L.job,L);
-    const rec=voc&&R()<.6;log(L,L.job==="フリーター"?`${n?n+"を卒業したが、":""}就職先が決まらず、フリーターになった。`:L.company==="実家の農家"?`${n}を卒業し、実家の農家を継いだ。`:`${n?n+"を卒業し、":""}${rec?"学校推薦で":""}${out?L.where+"の":/^地元の/.test(L.company)?"":"地元の"}${L.company}に${L.job}として就職した。${rec?"高卒は1人1社制。落ちたら次はなかった。":""}${kind==="工"?pick(["初任給は手取り17万円。","寮に入った。","最初の仕事は工具の名前を覚えることだった。",""]):""}`,"big");add(L,"j",3)};
+    const rec=voc&&R()<.6;log(L,L.job==="フリーター"?`${n?n+"を卒業したが、":""}就職先が決まらず、フリーターになった。`:L.company==="実家の農家"?`${n}を卒業し、実家の農家を継いだ。`:`${n?n+"を卒業し、":""}${rec?"学校推薦で":""}${/^地元の/.test(L.company)?(out?L.company.replace(/^地元の/,L.where+"の"):L.company):(out?L.where+"の":"地元の")+L.company}に${L.job}として就職した。${rec?"高卒は1人1社制。落ちたら次はなかった。":""}${kind==="工"?pick(["初任給は手取り17万円。","寮に入った。","最初の仕事は工具の名前を覚えることだった。",""]):""}`,"big");add(L,"j",3)};
   // 進路そのものはストーリー（統計で決まる）
   const wUni=pu*100, wSen=22*Math.max(.1,(68-hd)/18), wJob=p.job*(L.hs&&L.hs.voc?2:1)*Math.max(.05,(66-hd)/16);
   if(L.flags.scout&&!ronin&&R()<.6){const sport=L.club==="野球部"?["プロ野球選手",NPB,"ドラフト"]:L.club==="サッカー部"?["Jリーガー",JL,"加入"]:["Bリーガー",BL,"契約"];const team=pick(sport[1]);log(L,`プロ志望届を出した。`);
@@ -1406,8 +1408,9 @@ function status(L){if(!L.alive)return`${L.age}歳で亡くなった（${L.cause}
 
 // ===== 人生タイトル・レア度 =====
 function evHas(L,re){return L.events.some(e=>e.t&&/big|red/.test(e.cls||"")&&re.test(e.t))}
-function lifeTitle(L){
-  const JOB=L.job==="無職"&&L.flags.lastJob?L.flags.lastJob:L.job;const F=L.flags,net=L.assets-L.debt,isPro=JOBS[JOB]&&JOBS[JOB].pro,tl=(F.titles||[]).join(" ");
+function jobLabel(L){if(L.job&&L.job!=="無職"&&L.job!=="服役中")return L.job;if(L.job==="服役中")return"服役中";if(L.flags.lastJob&&L.flags.lastJob!=="無職")return"元"+L.flags.lastJob+(L.retired?"（引退）":"");return L.job||"無職"}
+function lifeTitle(L){const J=(L.job==="無職"||L.job==="服役中")&&L.flags.lastJob?L.flags.lastJob:L.job;
+  const JOB=J==="無職"&&L.flags.lastJob?L.flags.lastJob:L.job;const F=L.flags,net=L.assets-L.debt,isPro=JOBS[JOB]&&JOBS[JOB].pro,tl=(F.titles||[]).join(" ");
   const everPro=isPro||evHas(L,/ドラフト|契約金|戦力外|プロ契約/);
   const rules=[
     [/ノーベル/.test(tl),"人類に名を刻んだ人"],
@@ -1451,15 +1454,15 @@ function lifeTitle(L){
   ];
   const r=rules.find(x=>x[0]);return r?r[1]:"ふつうの、一度きりの人";
 }
-function rarity(L){
-  const F=L.flags,net=L.assets-L.debt,tl=(F.titles||[]).join(" "),isPro=JOBS[L.job]&&JOBS[L.job].pro;
+function rarity(L){const J=(L.job==="無職"||L.job==="服役中")&&L.flags.lastJob?L.flags.lastJob:L.job;
+  const F=L.flags,net=L.assets-L.debt,tl=(F.titles||[]).join(" "),isPro=JOBS[J]&&JOBS[J].pro;
   const c=[
     [/ノーベル/.test(tl),1e-6,"ノーベル賞"],
     [isPro||evHas(L,/ドラフト|プロ契約/),.02,"プロ選手"],
     [/MLB|NBA|メジャー/.test(tl)||evHas(L,/メジャー移籍|NBAに/),.02,"海外トップリーグ"],
-    [/アイドル|芸人|俳優|タレント/.test(L.job)||evHas(L,/紅白|CDデビュー/),.005,"芸能界"],
-    [/YouTuber|インフルエンサー/.test(L.job),.008,"配信で食べた"],
-    [L.job==="プロゲーマー",.005,"プロゲーマー"],
+    [/アイドル|芸人|俳優|タレント/.test(J)||evHas(L,/紅白|CDデビュー/),.005,"芸能界"],
+    [/YouTuber|インフルエンサー/.test(J),.008,"配信で食べた"],
+    [J==="プロゲーマー",.005,"プロゲーマー"],
     [F.giin,.03,"議員当選"],
     [L.univ&&/東京大学|京都大学/.test(L.univ.name),.06,"東大・京大"],
     [L.fac==="医学部"&&L.univ,.008,"医学部"],
@@ -1472,8 +1475,8 @@ function rarity(L){
     [L.age<1,.002,"生後まもなく"],
     [L.age>=1&&L.age<20,.007,"20歳前に死去"],
     [(F.roninN||0)>=3,.01,`${F.roninN}浪`],
-    [L.job==="暴力団員"||evHas(L,/組員になった|盃を/),.015,"暴力団"],
-    [L.job==="服役中"||evHas(L,/逮捕され.*懲役|実刑判決/),.05,"服役"],
+    [J==="暴力団員"||evHas(L,/組員になった|盃を/),.015,"暴力団"],
+    [J==="服役中"||evHas(L,/逮捕され.*懲役|実刑判決/),.05,"服役"],
     [evHas(L,/冤罪だと今も/),.01,"冤罪"],
     [L.kids.length>=4,.04,"子4人以上"],
     [L.cause==="自殺",.07,"自死"],
@@ -1558,7 +1561,7 @@ function home(){
   <section class="sheet" id="samples"><span class="label">最近ここで生まれた人たち</span><p class="muted" style="font-size:12px;margin-top:2px">シミュレーションの例。開くたびに変わります。</p><div class="mem" id="samplelist" style="margin-top:8px"></div></section>
   ${REVIEW_API?`<section class="sheet" id="reviews"></section>`:""}
   ${sourcesHTML()}`;
-  setTimeout(()=>{const el=$("#samplelist");if(!el)return;const rows=[];for(let i=0;i<5;i++){const o=shadowLife().L;const r=rarity(o);const path=[o.home+(o.town||""),o.hs?o.hs.name.replace(/\(.*$/,""):null,o.univ?o.univ.name+(o.fac?" "+o.fac:""):o.edu==="専門"?"専門学校":null,o.job||"無職"].filter(Boolean).join(" → ");
+  setTimeout(()=>{const el=$("#samplelist");if(!el)return;const rows=[];for(let i=0;i<5;i++){const o=shadowLife().L;const r=rarity(o);const path=[o.home+(o.town||""),o.hs?o.hs.name.replace(/\(.*$/,""):null,o.univ?o.univ.name+(o.fac?" "+o.fac:""):o.edu==="専門"?"専門学校":null,jobLabel(o)].filter(Boolean).join(" → ");
     rows.push(`<div style="display:block"><p style="margin:0;font-size:14px"><b style="font-family:var(--display)">${esc(o.name)}</b>　<span class="muted">${o.age}歳・${esc(o.cause==="自殺"?"自死":(o.causeDetail||o.cause))}</span>　<span class="rare"><span class="rk">${r.rank}</span></span></p><p class="muted" style="margin:0;font-size:12px">「${esc(lifeTitle(o))}」　${esc(path)}。${o.partner?esc(o.partner)+"と結婚":"独身"}${o.kids.length?"・子"+o.kids.length+"人":""}。生涯年収${yen(o.lifetime)}。</p></div>`)}
     el.innerHTML=rows.join("")},30);
   const t0=Date.now();clearInterval(S.cnt);
@@ -1680,7 +1683,7 @@ function drawCard(L){
   g.fillStyle="#1d2533";g.font="900 64px 'Zen Old Mincho',serif";g.fillText(title,70,180);
   g.font="700 40px 'Zen Old Mincho',serif";g.fillText(`${L.name}　${L.age}歳`,70,245);
   g.fillStyle="#5b6577";g.font="500 24px 'Zen Kaku Gothic New',sans-serif";
-  const path=[L.home+(L.town||"")+"生まれ",L.hs?L.hs.name.replace(/\(.*$/,""):null,L.univ?L.univ.name+(L.fac?" "+L.fac:""):L.edu==="専門"?"専門学校":null,L.job||"無職"].filter(Boolean).join(" → ");
+  const path=[L.home+(L.town||"")+"生まれ",L.hs?L.hs.name.replace(/\(.*$/,""):null,L.univ?L.univ.name+(L.fac?" "+L.fac:""):L.edu==="専門"?"専門学校":null,jobLabel(L)].filter(Boolean).join(" → ");
   const wrap=(s,max)=>{const out=[];let cur="";for(const ch of s){cur+=ch;if(g.measureText(cur).width>max){out.push(cur);cur=""}}if(cur)out.push(cur);return out};
   let y=300;wrap(path,W-140).forEach(l=>{g.fillText(l,70,y);y+=34});
   y+=10;g.fillStyle="#1d2533";g.font="500 26px 'Zen Kaku Gothic New',sans-serif";
@@ -1736,8 +1739,8 @@ function ending(){
     $("#report").innerHTML=items.map(([n,v])=>`<div><span class="label">${n}は同じ年に生まれた人の</span><b>上位${100-v}%</b></div>`).join("");
     const mine=myPref();if(mine&&mine!==L.home){const mp=P.find(p=>p.full===mine);const M=newLife(true);M.p=mp;M.home=mp.full;M.where=mp.full;M.lt=lifeTable(mp,M.sex);M.name=L.name;while(M.alive&&M.age<125){const d=stepYearAll(M);if(d)autoResolve(M,d);if(!M.alive)break;M.age++}
       $("#mine-life").innerHTML=`<span class="label">もし${esc(mine)}に生まれていたら</span><p style="font-size:13px">${esc(M.hs?M.hs.name:"")}${M.univ?"→"+esc(M.univ.name)+" "+esc(M.fac):""}→${esc(M.job||"")}。${M.married?esc(M.partner)+"と結婚、":"独身、"}${M.age}歳で${esc(M.cause)}。生涯年収${yen(M.lifetime)}。</p>`}
-    const sh=`【1億2380万分の1】${L.name}（${L.home}${L.district?"・"+L.district:""}生まれ）\n${L.hs?L.hs.name+"（"+L.hs.dev+"（−５））":""}${L.univ?" → "+L.univ.name+" "+L.fac+(L.univ.type==="国公立"?"（＋５）":""):""}${L.track==="理"?" 理系（＋５）":""}\n${L.job||"―"}・生涯年収${yen(L.lifetime)}・資産${yen(L.assets-L.debt)}\n${L.partner?L.partner+"と結婚":"生涯独身"}${L.kids.length?"・子"+L.kids.length+"人":""}\n${L.age}歳、${L.cause==="自殺"?"自ら命を絶った":L.cause+"で死去"}。`;
-    const short=`${L.home}${L.town||""}生まれ、${L.hs?L.hs.name.replace(/\(.*$/,"")+"→":""}${L.univ?L.univ.name+(L.fac?" "+L.fac:"")+"→":L.edu==="専門"?"専門学校→":""}${L.job||"無職"}。${L.partner?"結婚":"独身"}${L.kids.length?"・子"+L.kids.length+"人":""}。${L.age}歳、${L.cause==="自殺"?"自死":(L.causeDetail||L.cause)}。生涯年収${yen(L.lifetime)}。${L.flags.titles&&L.flags.titles.length?L.flags.titles[0].replace(/^\d+年 /,"")+"。":""}`;
+    const sh=`【1億2380万分の1】${L.name}（${L.home}${L.district?"・"+L.district:""}生まれ）\n${L.hs?L.hs.name+"（"+L.hs.dev+"（−５））":""}${L.univ?" → "+L.univ.name+" "+L.fac+(L.univ.type==="国公立"?"（＋５）":""):""}${L.track==="理"?" 理系（＋５）":""}\n${jobLabel(L)}・生涯年収${yen(L.lifetime)}・資産${yen(L.assets-L.debt)}\n${L.partner?L.partner+"と結婚":"生涯独身"}${L.kids.length?"・子"+L.kids.length+"人":""}\n${L.age}歳、${L.cause==="自殺"?"自ら命を絶った":L.cause+"で死去"}。`;
+    const short=`${L.home}${L.town||""}生まれ、${L.hs?L.hs.name.replace(/\(.*$/,"")+"→":""}${L.univ?L.univ.name+(L.fac?" "+L.fac:"")+"→":L.edu==="専門"?"専門学校→":""}${jobLabel(L)}。${L.partner?"結婚":"独身"}${L.kids.length?"・子"+L.kids.length+"人":""}。${L.age}歳、${L.cause==="自殺"?"自死":(L.causeDetail||L.cause)}。生涯年収${yen(L.lifetime)}。${L.flags.titles&&L.flags.titles.length?L.flags.titles[0].replace(/^\d+年 /,"")+"。":""}`;
     const tw=`【1億2380万分の1】${L.name}の一生「${lifeTitle(L)}」（${rarity(L).text}の人生）\n${short}\n${nick()?"プレイヤー："+nick()+"\n":""}https://kikt6.github.io/1oku2380man/\n#1億2380万分の1`;
     try{const cv=drawCard(L);cv.style.cssText="width:100%;max-width:600px;border:1px solid var(--rule);border-radius:6px";$("#cardwrap").appendChild(cv);$("#savecard").onclick=()=>{const a=document.createElement("a");a.download=`1oku2380man_${L.name}.png`;a.href=cv.toDataURL("image/png");a.click()}}catch(e){$("#savecard").hidden=true}$("#tweet").href="https://x.com/intent/post?text="+encodeURIComponent(tw);
     $("#share").value=sh;$("#copy").onclick=()=>{navigator.clipboard.writeText(sh).then(()=>{$("#copy").textContent="コピーした"}).catch(()=>{$("#share").select()})}},50);
