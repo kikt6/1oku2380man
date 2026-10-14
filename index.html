@@ -1058,6 +1058,8 @@ function rarity(L){
 const GC="https://1oku2380man.goatcounter.com";
 function track(path,title){try{if(window.goatcounter&&goatcounter.count)goatcounter.count({path,title,event:true})}catch(e){}}
 function showPlays(){try{if(!window.goatcounter)return;fetch(GC+"/counter/life-start.json").then(r=>r.json()).then(d=>{const el=$("#plays");if(el&&d&&d.count){el.hidden=false;el.innerHTML=`これまでに <b class="num">${String(d.count).replace(/[^\d]/g,"")}</b> 人がここで生まれました`}}).catch(()=>{})}catch(e){}}
+const FORM_URL="";// レビュー用Googleフォーム（未設定なら非表示）
+const nick=()=>{try{return (localStorage.getItem("68man_nick")||"").trim().slice(0,20)}catch(e){return ""}};
 // ===== 状態 =====
 let S={view:"home",speed:4,L:null,others:[],timer:null,dec:null,pause:false,auto:false,breath:null,paths:false};
 const MEMKEY="68man_mem_v2";
@@ -1101,6 +1103,8 @@ function home(){
   <section class="sheet setup">
     <div class="row"><span class="label">1年の速さ</span>
       <div class="chips" id="spd">${[[6,"ゆっくり（1年6秒・約8分）"],[4,"ふつう（1年4秒・約5分半）"],[3,"はやい（1年3秒・約4分）"]].map(([v,t])=>`<button class="chip" aria-pressed="${v===S.speed}" data-v="${v}">${t}</button>`).join("")}</div></div>
+    <div class="row"><span class="label">ニックネーム（任意。最期の記録とXの投稿に「プレイヤー：○○」と入ります）</span>
+      <input type="text" id="nick" maxlength="20" placeholder="例：るっち" value="${esc(nick())}" style="font-size:15px;max-width:260px"></div>
     <div class="row"><span class="label">生まれる都道府県（任意。選ばなければ出生数に応じてランダム。市区町村はこちらで決めます）</span>
       <select id="bornpref"><option value="">ランダム</option>${P.map(p=>`<option>${p.full}</option>`).join("")}</select></div>
     <div class="row"><span class="label">生まれる年（統計は今のまま。暦年の出来事だけ変わる）</span>
@@ -1118,7 +1122,7 @@ function home(){
     cb.textContent=Math.floor(s/BI);cd.textContent=Math.floor(s/DI);$("#cbn").textContent=`次の赤ちゃんまで ${Math.ceil(BI-s%BI)}秒（46秒に1人）`;$("#cdn").textContent=`次まで ${Math.ceil(DI-s%DI)}秒（20秒に1人）`},250);
   document.querySelectorAll("#spd .chip").forEach(b=>b.onclick=()=>{S.speed=+b.dataset.v;home()});
   $("#mine").onchange=e=>{try{localStorage.setItem("68man_mine",e.target.value)}catch(_){}};
-  $("#go").onclick=()=>birth(null,$("#bornpref").value||null,+$("#byear").value);showPlays();
+  $("#go").onclick=()=>{try{localStorage.setItem("68man_nick",$("#nick").value.trim().slice(0,20))}catch(e){}birth(null,$("#bornpref").value||null,+$("#byear").value)};showPlays();
 }
 function myPref(){try{return localStorage.getItem("68man_mine")||""}catch(e){return""}}
 
@@ -1144,7 +1148,7 @@ function birth(prev,fp,by){
     ${L.prevLife?`<p class="muted" style="margin-top:14px;font-size:13px">前世の${esc(L.prevLife)}の子として生まれた。</p>`:""}${mine?`<p class="muted" style="margin-top:14px;font-size:13px">あなたは${esc(mine)}生まれ。${mine===L.home?"同じ県に生まれた。":"今回は違う土地に生まれた。"}</p>`:""}
   </section>
   <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="start">人生を始める</button><button class="btn ghost" id="back">やめる</button></div>`;
-  $("#start").onclick=()=>{const v=$("#nm").value.trim();if(v)L.name=v;let want="1";try{want=localStorage.getItem("68man_bgm")??"1"}catch(e){}if(want==="1")BGM.start();track("life-start","人生を始めた");play()};$("#back").onclick=home;
+  $("#start").onclick=()=>{const v=$("#nm").value.trim();if(v)L.name=v;let want="1";try{want=localStorage.getItem("68man_bgm")??"1"}catch(e){}if(want==="1")BGM.start();track("life-start","人生を始めた");if(nick())track("player/"+nick(),nick());play()};$("#back").onclick=home;
 }
 
 function play(){S.view="play";const L=S.L;
@@ -1236,7 +1240,7 @@ function drawCard(L){
   facts.forEach(f=>{g.fillText(f,70,y);y+=38});
   g.fillStyle="#c8372d";g.font="700 28px 'Zen Kaku Gothic New',sans-serif";g.fillText(`${ra.stars}　${ra.text}の人生`,70,H-80);
   g.save();g.translate(W-150,130);g.rotate(-.12);g.strokeStyle="#c8372d";g.lineWidth=5;g.strokeRect(-60,-60,120,120);g.fillStyle="#c8372d";g.font="900 44px 'Zen Old Mincho',serif";g.textAlign="center";g.fillText("死亡",0,-6);g.fillText("届出",0,42);g.restore();
-  g.fillStyle="#9aa4b5";g.font="500 18px 'IBM Plex Mono',monospace";g.textAlign="right";g.fillText("kikt6.github.io/1oku2380man",W-70,H-80);
+  g.fillStyle="#9aa4b5";g.font="500 18px 'IBM Plex Mono',monospace";g.textAlign="right";g.fillText("kikt6.github.io/1oku2380man",W-70,H-80);if(nick()){g.font="500 20px 'Zen Kaku Gothic New',sans-serif";g.fillText("Player: "+nick(),W-70,H-110)}
   return cv;
 }
 
@@ -1251,6 +1255,7 @@ function ending(){
     <span class="label">最期の記録</span>
     <h2>${L.name}<br><span class="num" style="font-size:20px">${L.age}歳</span></h2>
     <p style="font-family:var(--display);font-size:24px;font-weight:900;margin:4px 0 2px">「${esc(lifeTitle(L))}」</p>
+    ${nick()?`<p class="muted" style="font-size:12px;margin:0">プレイヤー：${esc(nick())}</p>`:""}
     <p class="muted" style="font-size:13px;margin:0 0 8px">${(()=>{const r=rarity(L);return `レア度 <b style="color:var(--shu)">${r.rank}</b> ${r.stars}　${esc(r.text)}の人生${r.tags.length?"　｜　"+esc(r.tags.join("・")):""}`})()}</p>
     <p>${L.home}${L.town||""}に生まれ、${L.where===L.home?"その土地で":L.where+"で"}暮らした。${L.cause==="自殺"?"自ら命を絶った。":(L.causeDetail||L.cause)+"で亡くなった。"}${(L.assets-L.debt)<-100?`借金${yen(Math.abs(L.assets-L.debt))}を残した。${L.kids.length||L.married?"家族は相続放棄をした。":"相続人はいなかった。"}`:""}</p>
     <div class="facts">
@@ -1272,7 +1277,7 @@ function ending(){
     <div class="row"><label class="label" for="lw">この人にひとこと</label><input type="text" id="lw" placeholder="おつかれさま"></div>
     <div class="facts" id="report"></div>
     <div id="mine-life"></div>
-    <div class="row"><span class="label">この人生を共有する</span><textarea id="share" rows="4" readonly></textarea><div id="cardwrap" style="margin:8px 0"></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="savecard">画像を保存</button><a class="btn" id="tweet" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">Xに投稿する</a><button class="btn ghost" id="copy">コピー</button></div></div>
+    <div class="row"><span class="label">この人生を共有する</span><textarea id="share" rows="4" readonly></textarea><div id="cardwrap" style="margin:8px 0"></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="savecard">画像を保存</button><a class="btn" id="tweet" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">Xに投稿する</a><button class="btn ghost" id="copy">コピー</button>${FORM_URL?`<a class="btn ghost" href="${FORM_URL}" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">レビューを書く</a>`:""}</div></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="again">もう一度生まれる</button>${L.kids.some(k=>!k.dead)?`<button class="btn" id="rebirth">この人の子として生まれ直す</button>`:""}<button class="btn ghost" id="tohome">はじめに戻る</button></div>
   </section>
   <section class="sheet"><span class="label">人生の記録</span><div class="log" style="max-height:none">${L.events.filter(e=>e.t).map(e=>`<div class="ev ${e.cls}"><span class="a">${e.a}歳</span><p>${esc(e.t)}</p></div>`).join("")}</div></section>`;
@@ -1285,13 +1290,13 @@ function ending(){
       $("#mine-life").innerHTML=`<span class="label">もし${esc(mine)}に生まれていたら</span><p style="font-size:13px">${esc(M.hs?M.hs.name:"")}${M.univ?"→"+esc(M.univ.name)+" "+esc(M.fac):""}→${esc(M.job||"")}。${M.married?esc(M.partner)+"と結婚、":"独身、"}${M.age}歳で${esc(M.cause)}。生涯年収${yen(M.lifetime)}。</p>`}
     const sh=`【1億2380万分の1】${L.name}（${L.home}${L.district?"・"+L.district:""}生まれ）\n${L.hs?L.hs.name+"（"+L.hs.dev+"（−５））":""}${L.univ?" → "+L.univ.name+" "+L.fac+(L.univ.type==="国公立"?"（＋５）":""):""}${L.track==="理"?" 理系（＋５）":""}\n${L.job||"―"}・生涯年収${yen(L.lifetime)}・資産${yen(L.assets-L.debt)}\n${L.partner?L.partner+"と結婚":"生涯独身"}${L.kids.length?"・子"+L.kids.length+"人":""}\n${L.age}歳、${L.cause==="自殺"?"自ら命を絶った":L.cause+"で死去"}。${wk?"学歴ポイント"+wk:""}`;
     const short=`${L.home}${L.town||""}生まれ、${L.hs?L.hs.name.replace(/\(.*$/,"")+"→":""}${L.univ?L.univ.name+(L.fac?" "+L.fac:"")+"→":L.edu==="専門"?"専門学校→":""}${L.job||"無職"}。${L.partner?"結婚":"独身"}${L.kids.length?"・子"+L.kids.length+"人":""}。${L.age}歳、${L.cause==="自殺"?"自死":(L.causeDetail||L.cause)}。生涯年収${yen(L.lifetime)}${wk?"、学歴ポイント"+wk:""}。${L.flags.titles&&L.flags.titles.length?L.flags.titles[0].replace(/^\d+年 /,"")+"。":""}`;
-    const tw=`【1億2380万分の1】${L.name}の一生「${lifeTitle(L)}」（${rarity(L).text}の人生）\n${short}\n#1億2380万分の1 #日本版人生シミュレーション`;
+    const tw=`【1億2380万分の1】${L.name}の一生「${lifeTitle(L)}」（${rarity(L).text}の人生）\n${short}\n${nick()?"プレイヤー："+nick()+"\n":""}https://kikt6.github.io/1oku2380man/\n#1億2380万分の1`;
     try{const cv=drawCard(L);cv.style.cssText="width:100%;max-width:600px;border:1px solid var(--rule);border-radius:6px";$("#cardwrap").appendChild(cv);$("#savecard").onclick=()=>{const a=document.createElement("a");a.download=`1oku2380man_${L.name}.png`;a.href=cv.toDataURL("image/png");a.click()}}catch(e){$("#savecard").hidden=true}$("#tweet").href="https://x.com/intent/post?text="+encodeURIComponent(tw);
     $("#share").value=sh;$("#copy").onclick=()=>{navigator.clipboard.writeText(sh).then(()=>{$("#copy").textContent="コピーした"}).catch(()=>{$("#share").select()})}},50);
 }
 function sourcesHTML(){return`<section class="sheet src">
   <p>出典：<a href="https://www.mhlw.go.jp/toukei/list/81-1a.html" target="_blank" rel="noopener">人口動態統計</a>／<a href="https://www.mhlw.go.jp/toukei/saikin/hw/life/tdfk20/index.html" target="_blank" rel="noopener">令和2年都道府県別生命表</a>／<a href="https://www.stat.go.jp/data/jinsui/2024np/index.html" target="_blank" rel="noopener">人口推計2024</a>／<a href="https://www.ipss.go.jp/syoushika/tohkei/Popular/Popular2024.asp" target="_blank" rel="noopener">人口統計資料集2024</a>／<a href="https://www.mhlw.go.jp/toukei/itiran/roudou/chingin/kouzou/z2024/" target="_blank" rel="noopener">令和6年賃金構造基本統計調査</a>／<a href="https://www.stat.go.jp/data/sav/sokuhou/nen/index.html" target="_blank" rel="noopener">家計調査 貯蓄・負債編2024</a>／<a href="https://www.minkou.jp/hischool/ranking/deviation/" target="_blank" rel="noopener">みんなの高校情報</a>／<a href="https://www.minkou.jp/university/ranking/deviation/" target="_blank" rel="noopener">みんなの大学情報</a>／<a href="https://www.pref.fukuoka.lg.jp/site/kyouiku/tuugakukuikikisoku.html" target="_blank" rel="noopener">福岡県立高等学校通学区域規則</a></p>
-  <p>統計にない出来事の確率や収入はゲーム上の設定です。18歳以上向け。ベータ版。</p></section>`}
+  <p>統計にない出来事の確率や収入はゲーム上の設定です。18歳以上向け。ベータ版。${FORM_URL?`　<a href="${FORM_URL}" target="_blank" rel="noopener">ご意見・レビューはこちら</a>`:""}</p></section>`}
 home();
 </script>
 </body>
