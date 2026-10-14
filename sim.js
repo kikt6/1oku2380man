@@ -8,7 +8,7 @@ const N=+process.argv[2]||1000,BY=+process.argv[3]||2024;
 function life(by){const L=E.newLife(true,null,null,by);while(L.alive&&L.age<125){const d=E.stepYearAll(L);if(d)E.autoResolve(L,d);if(!L.alive)break;L.age++}return L}
 const med=a=>{const b=[...a].sort((x,y)=>x-y);return b[Math.floor(b.length/2)]};
 const ages=[],joy=[],net=[],inc=[],ranks={},causes={},jobs={},edu={},dup=[],odd=[],consec=[];let married=0,kids=0,uni=0,neg=0,oku=0,suicide=0,kidsN=0,divorce=0,poorCnt=0,ronin=0,avgEv=0;
-const oddRe=/地元の地元|のの|。。|undefined|NaN|null|\[object|  |、、|をを|にに|でで/;
+const oddRe=/地元の地元|(?<![ょ])のの|。。|undefined|NaN|\bnull\b|\[object|、、|をを|にに(?!ち)/;
 for(let i=0;i<N;i++){const L=life(BY);ages.push(L.age);joy.push(L.st.j);const nn=L.assets-L.debt;net.push(nn);inc.push(L.lifetime);const r=E.rarity(L).rank;ranks[r]=(ranks[r]||0)+1;causes[L.cause]=(causes[L.cause]||0)+1;jobs[L.job]=(jobs[L.job]||0)+1;edu[L.edu||"?"]=(edu[L.edu||"?"]||0)+1;
   if(L.married||L.divorced||L.flags.widowed||L.mar)married++;if(L.kids.length)kids++;kidsN+=L.kids.length;if(L.univ)uni++;if(nn<0)neg++;if(nn>=10000)oku++;if(L.cause==="自殺")suicide++;if(L.divorced)divorce++;if(L.flags.poor)poorCnt++;if(L.flags.roninN)ronin++;avgEv+=L.events.length;
   const seen=new Map();let prev=null;L.events.forEach(e=>{if(!e.t)return;if(oddRe.test(e.t))odd.push(e.t.slice(0,80));const k=e.t.slice(0,40);seen.set(k,(seen.get(k)||0)+1);if(prev&&prev.t===e.t)consec.push(e.t.slice(0,60));prev=e});
