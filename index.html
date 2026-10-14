@@ -1721,7 +1721,7 @@ const ACHV=[
 const AKEY="68man_achv";
 function loadAch(){try{return JSON.parse(localStorage.getItem(AKEY)||"{}")}catch(e){return{}}}
 function saveAch(a){try{localStorage.setItem(AKEY,JSON.stringify(a))}catch(e){}}
-function recordLife(L){const A=loadAch();A.lives=(A.lives||0)+1;A.prefs=A.prefs||{};A.prefs[L.home]=1;A.got=A.got||{};A.cleared=A.cleared||{};const now=Date.now();const newly=[];
+function recordLife(L){const A=loadAch();A.lives=(A.lives||0)+1;if(S.mode==="slow")A.normal=(A.normal||0)+1;A.prefs=A.prefs||{};A.prefs[L.home]=1;A.got=A.got||{};A.cleared=A.cleared||{};const now=Date.now();const newly=[];
   ACHV.forEach(([id,name,desc,fn])=>{let ok=false;if(fn)ok=!!fn(L);else if(id==="allpref")ok=Object.keys(A.prefs).length>=47;else if(id==="pref10")ok=Object.keys(A.prefs).length>=10;else if(id==="lives10")ok=A.lives>=10;else if(id==="lives50")ok=A.lives>=50;else if(id==="chal_all")ok=CHALLENGES.every(c=>A.cleared[c.id]);
     if(ok&&!A.got[id]){A.got[id]=now;newly.push(id)}});
   if(S.challenge){const c=CHALLENGES.find(c=>c.id===S.challenge);if(c&&chalDone(c,L)&&!A.cleared[c.id]){A.cleared[c.id]=now;if(CHALLENGES.every(c=>A.cleared[c.id])&&!A.got.chal_all){A.got.chal_all=now;newly.push("chal_all")}}}
@@ -1896,7 +1896,7 @@ function home(){
     <div><button class="btn" id="go">生まれる</button></div>
     <details class="more" ${S.challenge?"open":""}><summary>チャレンジ・ニックネーム・生まれる県や年を選ぶ</summary><div class="setup" style="margin-top:12px">
     <div class="row"><span class="label">チャレンジ（任意）</span><p class="muted" style="font-size:12px;margin:0 0 4px">目標を決めて生まれる。出生や確率は変わりません。達成はこの端末に記録されます。</p>
-      <div class="chal" id="chal">${(()=>{const A=loadAch();return CHALLENGES.map(c=>`<button class="chalc ${S.challenge===c.id?"on":""} ${A.cleared&&A.cleared[c.id]?"done":""}" data-c="${c.id}"><b>${c.name}</b><span class="d">${"★".repeat(c.diff)}${"☆".repeat(4-c.diff)}</span><small>${c.desc}</small></button>`).join("")})()}</div></div>
+      <div class="chal" id="chal">${(()=>{const A=loadAch();const nn=A.normal||0;if(nn<5)return `<p class="muted" style="grid-column:1/-1;font-size:13px;margin:0">🔒 「${MODES.slow.label}」で5回生きると選べるようになります（あと${5-nn}回）</p>`;return CHALLENGES.map(c=>`<button class="chalc ${S.challenge===c.id?"on":""} ${A.cleared&&A.cleared[c.id]?"done":""}" data-c="${c.id}"><b>${c.name}</b><span class="d">${"★".repeat(c.diff)}${"☆".repeat(4-c.diff)}</span><small>${c.desc}</small></button>`).join("")})()}</div></div>
     <div class="row"><span class="label">ニックネーム（任意。最期の記録とXの投稿に「プレイヤー：○○」と入ります）</span>
       <input type="text" id="nick" maxlength="20" placeholder="ニックネーム" value="${esc(nick())}" style="font-size:15px;max-width:260px"></div>
     <div class="row"><span class="label">生まれる都道府県（任意。選ばなければ出生数に応じてランダム。市区町村はこちらで決めます）</span>
