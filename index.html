@@ -881,7 +881,7 @@ function decJuken(L){const d=devOf(L)+4,all=HS[L.p.n]||[];const reg=region(L.p.n
   o.push({t:"中学受験はしない",s:"地元の公立中学へ",w:50,f(){log(L,"中学受験はせず、友だちと同じ地元の中学に進むことにした。")}});
   return{title:"小学5年。親に「中学受験、どうする？」と聞かれた。",text:`${L.home}の私立中学受験。塾代は年100万円近くかかる。`,opts:o}}
 function decTrack(L){return{moral:1,title:"文理選択。",text:"高2のクラス分け。",opts:[
-  {t:"理系（＋５）",s:"数学III・物理",w:L.st.k>55?55:40,f(){L.track="理";log(L,`理系クラスに進んだ。（＋５）${pick(["数学が得意だった","医者になりたかった","父が工場勤めで、ものづくりに興味があった","理系のほうが就職に強いと聞いた","好きな人が理系だった"])}。`);add(L,"k",2)}},
+  {t:"理系",s:"数学III・物理",w:L.st.k>55?55:40,f(){L.track="理";log(L,`理系クラスに進んだ。（＋５）${pick(["数学が得意だった","医者になりたかった","父が工場勤めで、ものづくりに興味があった","理系のほうが就職に強いと聞いた","好きな人が理系だった"])}。`);add(L,"k",2)}},
   {t:"文系",s:"",w:50,f(){L.track="文";log(L,`文系クラスに進んだ。（＋０）${pick(["数学で赤点を取った","本を読むのが好きだった","弁護士になりたかった","友だちが文系だった","将来は決めていなかった"])}。`)}}]}}
 function dec18(L,ronin){const p=L.p,d=devOf(L)+(L.hs?Math.round((L.hs.dev-55)*.25):0)+(ronin?3:0);
   const pool=univPool(L);const by=f=>pool.filter(f).sort((a,b)=>b.dev-a.dev);
