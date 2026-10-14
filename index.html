@@ -1100,7 +1100,7 @@ function home(){
   <header class="hero">
     <span class="label">日本の人口 1億2,380万人（2024年10月）・去年の出生 ${TOTAL.toLocaleString()}人</span>
     <h1>1億2380万分の1<small>の人生</small></h1>
-    <p class="lead">日本に暮らす1億2千万人のうち、去年生まれたのは68万6千人。そのひとりとして、一度きりの人生を最後まで生きてみます。どの県に、どんな家に生まれるかは選べません。高校も大学も職業も年収も、実際の名前と統計で勝手に決まっていきます。あなたが決めるのは、助けるか、助けないか。</p>
+    <p class="lead">日本に暮らす1億2千万人のうち、去年生まれたのは68万6千人。そのひとりとして、一度きりの人生を最後まで生きてみます。どの県に、どんな家に生まれるかは選べません。高校も大学も職業も年収も、実際の名前と統計で勝手に決まっていきます。あなたが決めるのは、受ける学校と、助けるか、助けないか。</p>
     <div class="counter">
       <div><b class="num" id="cb">0</b><span class="label">このページを開いてから<br>日本で生まれた赤ちゃん<br><span id="cbn">次の赤ちゃんまで 46秒</span></span></div>
       <div><b class="num" id="cd">0</b><span class="label">同じ時間に<br>亡くなった人<br><span id="cdn">次まで 20秒</span></span></div>
@@ -1114,8 +1114,6 @@ function home(){
       <input type="text" id="nick" maxlength="20" placeholder="例：るっち" value="${esc(nick())}" style="font-size:15px;max-width:260px"></div>
     <div class="row"><span class="label">生まれる都道府県（任意。選ばなければ出生数に応じてランダム。市区町村はこちらで決めます）</span>
       <select id="bornpref"><option value="">ランダム</option>${P.map(p=>`<option>${p.full}</option>`).join("")}</select></div>
-    <div class="row"><span class="label">自分で決めること</span>
-      <div class="chips" id="pathsopt"><button class="chip" data-v="1" aria-pressed="${S.paths}">受験校（中学・高校・大学）は自分で決める</button><button class="chip" data-v="0" aria-pressed="${!S.paths}">善悪の選択だけ（進路は全部ストーリー）</button></div></div>
     <div class="row"><span class="label">生まれる年（統計は今のまま。暦年の出来事だけ変わる）</span>
       <select id="byear"><option value="2024">2024年（いま）</option>${[2010,2000,1990,1980,1970,1960].map(y=>`<option value="${y}">${y}年</option>`).join("")}</select></div>
     <div class="row"><span class="label">あなたが生まれた都道府県（任意・この端末だけに保存）</span>
@@ -1132,7 +1130,6 @@ function home(){
     cb.textContent=Math.floor(s/BI);cd.textContent=Math.floor(s/DI);$("#cbn").textContent=`次の赤ちゃんまで ${Math.ceil(BI-s%BI)}秒（46秒に1人）`;$("#cdn").textContent=`次まで ${Math.ceil(DI-s%DI)}秒（20秒に1人）`},250);
   document.querySelectorAll("#spd .chip").forEach(b=>b.onclick=()=>{S.speed=+b.dataset.v;home()});
   $("#mine").onchange=e=>{try{localStorage.setItem("68man_mine",e.target.value)}catch(_){}};
-  document.querySelectorAll("#pathsopt .chip").forEach(b=>b.onclick=()=>{S.paths=b.dataset.v==="1";document.querySelectorAll("#pathsopt .chip").forEach(x=>x.setAttribute("aria-pressed",x===b))});
   loadReviews($("#reviews"));$("#go").onclick=()=>{try{localStorage.setItem("68man_nick",$("#nick").value.trim().slice(0,20))}catch(e){}birth(null,$("#bornpref").value||null,+$("#byear").value)};showPlays();
 }
 function myPref(){try{return localStorage.getItem("68man_mine")||""}catch(e){return""}}
@@ -1169,7 +1166,7 @@ function play(){S.view="play";const L=S.L;
     <div class="stats" id="stats"></div>
     <div class="ctrl"><button class="chip" id="pz" aria-pressed="false">一時停止</button><button class="chip" id="bgm" aria-pressed="${BGM.on}">♪</button>
       <button class="chip" id="spdc">速さ：${({6:"ゆっくり",4:"ふつう",3:"はやい"})[S.speed]||S.speed+"秒"}</button>
-      <button class="chip" id="mode">${S.auto?"全部おまかせ":S.paths?"受験校も決める":"決めるのは善悪だけ"}</button>
+      <button class="chip" id="mode" aria-pressed="${S.auto}">全部おまかせ</button>
       <span class="label" style="margin-left:auto">今年の重点</span>
       <select id="focus" aria-label="今年の重点"><option value="r">人間関係</option><option value="k">勉強</option><option value="h">健康</option><option value="j">自分の時間</option></select>
     </div>
@@ -1185,7 +1182,7 @@ function play(){S.view="play";const L=S.L;
   $("#pz").onclick=e=>{S.pause=!S.pause;e.target.setAttribute("aria-pressed",S.pause);e.target.textContent=S.pause?"再開":"一時停止"};
   const SPD=[[6,"ゆっくり"],[4,"ふつう"],[3,"はやい"]];
   $("#spdc").onclick=e=>{let i=SPD.findIndex(x=>x[0]===S.speed);i=(i+1)%SPD.length;S.speed=SPD[i][0];e.target.textContent="速さ："+SPD[i][1];tick()};
-  $("#mode").onclick=e=>{const m=((S.auto?2:S.paths?1:0)+1)%3;/* 0:善悪だけ 1:受験校も 2:全部おまかせ */S.paths=m===1;S.auto=m===2;e.target.textContent=m===0?"決めるのは善悪だけ":m===1?"受験校も決める":"全部おまかせ"};
+  $("#mode").onclick=e=>{S.auto=!S.auto;e.target.setAttribute("aria-pressed",S.auto)};
   $("#focus").onchange=e=>L.focus=e.target.value;$("#bgm").onclick=e=>{if(BGM.on){BGM.stop()}else{BGM.start()}e.target.setAttribute("aria-pressed",BGM.on)};
   function tick(){clearInterval(S.timer);S.timer=setInterval(year,S.speed*1000/mult)}
   S.tick=tick;render();year();tick();
