@@ -688,11 +688,16 @@ function stepYear(L){
   if(x<=3&&R()<.2)log(L,pick(["手足口病で保育園を休んだ。","RSウイルスで入院した。","突発性発疹で高熱が出た。"]));
   if(x>=4&&x<=11&&R()<.2)log(L,pick(["水ぼうそうにかかって1週間休んだ。","インフルエンザで学級閉鎖になった。","おたふく風邪にかかった。","溶連菌で休んだ。"]));
   if(x>10&&R()<.08){log(L,pick(["インフルエンザで1週間寝込んだ。","ノロウイルスで3日間トイレから出られなかった。","帯状疱疹が出た。","マイコプラズマ肺炎で2週間休んだ。","食中毒で救急外来に行った。"]));add(L,"h",-2)}
-  if(x>=5&&!L.prison&&R()<.01&&(F.eras||0)<2){F.eras=(F.eras||0)+1;const era=wpick(["恐慌","戦争","首都直下","ハイパーインフレ","AI失業","金融危機"],[3,2,2,1,3,3]);const y=L.birthYear+x;
+  if(x>=5&&!L.prison&&R()<.01&&(F.eras||0)<2){F.eras=(F.eras||0)+1;const era=wpick(["恐慌","戦争","首都直下","ハイパーインフレ","AI失業","金融危機","改憲"],[3,2,2,1,3,3,2]);const y=L.birthYear+x;
     if(era==="恐慌"){log(L,`${y}年、世界恐慌。株価が3か月で6割下がり、会社の倒産が毎日ニュースになった。`,"red big");L.assets=Math.round(L.assets*(L.invest==="none"?.9:.55));if(L.job&&JOBS[L.job].reg&&!/公務員|教員|医師|看護師/.test(L.job)&&R()<.35){log(L,`勤め先が倒産した。退職金は出なかった。${pick(["ハローワークは3時間待ちだった。","同じ業界は全部採用を止めていた。","半年後、派遣で前の半分の給料の仕事に就いた。"])}`,"red big");L.job="フリーター";L.company="";add(L,"j",-15)}else if(L.job==="経営者"){log(L,"取引先が次々に消え、会社をたたんだ。借金だけが残った。","red big");L.job="無職";L.company="";L.debt+=1500}else add(L,"j",-6)}
     else if(era==="戦争"){log(L,`${y}年、隣国で戦争が始まった。${pick(["日本も巻き込まれ、ミサイル警報が毎週鳴った。","燃料と食料が配給制になった。","海上輸送が止まり、ガソリンが1リットル500円になった。"])}`,"red big");L.assets=Math.round(L.assets*.8);add(L,"j",-10);add(L,"h",-4);
       if(x>=18&&x<=35&&L.sex==="M"&&R()<.25){log(L,pick(["予備自衛官に志願した。","徴用で軍需工場に回された。","自衛官として前線近くの基地に配属された。"]),"red big");if(R()<.08){L.alive=false;L.cause="戦争";log(L,`戦闘で亡くなった。${x}歳。遺骨は帰らなかった。`,"red big");return null}}
       if(R()<.05){L.alive=false;L.cause="空爆";log(L,`空爆で亡くなった。${x}歳。`,"red big");return null}if(L.married&&R()<.04){log(L,`${L.partner}が空襲で亡くなった。`,"red big");L.married=false;F.widowed=1;add(L,"j",-25)}if(R()<.3)log(L,pick(["親戚の家に疎開した。","避難所で3か月暮らした。","海外に避難した友人と連絡が取れなくなった。"]),"red")}
+    else if(era==="改憲"){log(L,`${y}年、国民投票で憲法9条が改正された。自衛隊は国防軍になり、${y+1}年から18〜26歳に兵役義務ができた。`,"red big");F.conscript=y+1;add(L,"j",-3);
+      if(x>=17&&x<=25){const svc=pick(["陸上部隊","海上部隊","航空部隊","後方支援"]);log(L,`${y+1}年、召集令状が届いた。${svc}に配属、${pick(["北海道","九州","沖縄","日本海側"])}の駐屯地で2年。`,"red big");add(L,"h",4);add(L,"r",3);if(L.univ&&!L.flags.gradDone&&R()<.5)log(L,"大学は休学した。同級生は2年先に卒業した。","red");if(R()<.15){log(L,pick(["訓練中の事故で同期が死んだ。","配属先で初めて実弾の音を聞いた。","帰ってきてから、花火の音で体が動かなくなった。"]),"red");add(L,"j",-8)}if(R()<.03){L.alive=false;L.cause="戦争";L.causeDetail="兵役中の事故";log(L,`兵役中の訓練事故で亡くなった。${x+1}歳。`,"red big");return null}
+        if(R()<.1){log(L,pick(["兵役を拒否し、1年の禁錮刑を受けた。","海外に出て兵役を逃れた。帰国できなくなった。"]),"red big");add(L,"j",-10);if(R()<.5){L.where="海外";F.abroad=1}}}
+      else if(L.kids.some(k=>!k.dead&&x-k.born>=16&&x-k.born<=26)){const k=L.kids.find(k=>!k.dead&&x-k.born>=16&&x-k.born<=26);log(L,`${k.n}に召集令状が届いた。駅で見送った。`,"red big");add(L,"j",-10);if(R()<.04){k.dead=1;log(L,`${k.n}が兵役中の事故で亡くなった。遺骨だけが帰ってきた。`,"red big");add(L,"j",-30)}}
+      else if(x<18&&x>=8)log(L,"学校で「自分も行くのか」と友だちと話した。","red");}
     else if(era==="首都直下"){log(L,`${y}年、首都直下地震。死者2万人。${L.where==="東京都"||/神奈川|千葉|埼玉/.test(L.where)?"自分の街が被災した。":"ニュースを見て、東京の友人に連絡が取れなかった。"}`,"red big");if(L.where==="東京都"||/神奈川|千葉|埼玉/.test(L.where)){if(R()<.03){L.alive=false;L.cause="地震";log(L,`倒壊した建物の下敷きになり、亡くなった。${x}歳。`,"red big");return null}L.assets=Math.round(L.assets*.7);if(F.home){F.home=0;log(L,"家が全壊した。ローンだけが残った。","red")}log(L,pick(["3日間、会社から歩いて帰れなかった。","避難所で2週間過ごした。","電気と水道が1か月止まった。"]),"red");add(L,"h",-5);add(L,"j",-10)}}
     else if(era==="ハイパーインフレ"){log(L,`${y}年、円が暴落した。物価が1年で3倍になり、預金の価値が消えた。`,"red big");L.assets=L.invest==="none"?Math.round(L.assets*.35):Math.round(L.assets*.8);L.debt=Math.round(L.debt*.4);log(L,L.invest==="none"?"銀行に預けていた老後資金が、実質3分の1になった。":"持っていた株や投資信託が、預金よりはましだった。","red");add(L,"j",-8)}
     else if(era==="AI失業"){log(L,`${y}年、AIが事務・翻訳・プログラミングの仕事を一気に置き換えた。`,"big");if(/一般事務|通訳・翻訳|システムエンジニア|銀行員|公認会計士|税理士|編集者|デザイナー|コンサルタント/.test(L.job)&&R()<.5){log(L,`自分の仕事がなくなった。${pick(["会社は「AIの監督役」を10人だけ残した。自分は入らなかった。","再就職先は介護だった。","ベーシックインカムの議論が始まったが、間に合わなかった。"])}`,"red big");L.job=pick(["介護職員","警備員","トラック運転手","フリーター"]);L.company=compOf(L.job,L);add(L,"j",-12)}else log(L,pick(["自分の仕事は残った。隣の部署は半分になった。","AIを使う側に回った。給料は変わらなかった。"]))}
@@ -1063,7 +1068,7 @@ async function loadReviews(el){if(!REVIEW_API||!el)return;try{const r=await fetc
 async function postReview(body){const r=await fetch(REVIEW_API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(body)});return r.json()}
 const nick=()=>{try{return (localStorage.getItem("68man_nick")||"").trim().slice(0,20)}catch(e){return ""}};
 // ===== 状態 =====
-let S={view:"home",speed:4,L:null,others:[],timer:null,dec:null,pause:false,auto:false,breath:null,paths:false};
+let S={view:"home",speed:4,L:null,others:[],timer:null,dec:null,pause:false,auto:false,breath:null,paths:true};
 const MEMKEY="68man_mem_v2";
 function loadMem(){try{return JSON.parse(localStorage.getItem(MEMKEY)||"[]")}catch(e){return[]}}
 function saveMem(m){try{localStorage.setItem(MEMKEY,JSON.stringify(m.slice(0,10)))}catch(e){}}
@@ -1110,7 +1115,7 @@ function home(){
     <div class="row"><span class="label">生まれる都道府県（任意。選ばなければ出生数に応じてランダム。市区町村はこちらで決めます）</span>
       <select id="bornpref"><option value="">ランダム</option>${P.map(p=>`<option>${p.full}</option>`).join("")}</select></div>
     <div class="row"><span class="label">自分で決めること</span>
-      <div class="chips" id="pathsopt"><button class="chip" data-v="0" aria-pressed="${!S.paths}">善悪の選択だけ（進路はストーリー）</button><button class="chip" data-v="1" aria-pressed="${S.paths}">受験校（中学・高校・大学）も自分で決める</button></div></div>
+      <div class="chips" id="pathsopt"><button class="chip" data-v="1" aria-pressed="${S.paths}">受験校（中学・高校・大学）は自分で決める</button><button class="chip" data-v="0" aria-pressed="${!S.paths}">善悪の選択だけ（進路は全部ストーリー）</button></div></div>
     <div class="row"><span class="label">生まれる年（統計は今のまま。暦年の出来事だけ変わる）</span>
       <select id="byear"><option value="2024">2024年（いま）</option>${[2010,2000,1990,1980,1970,1960].map(y=>`<option value="${y}">${y}年</option>`).join("")}</select></div>
     <div class="row"><span class="label">あなたが生まれた都道府県（任意・この端末だけに保存）</span>
