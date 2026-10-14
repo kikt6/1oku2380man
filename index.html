@@ -132,6 +132,56 @@ table{border-collapse:collapse;font-size:12px;width:100%}
 td,th{padding:3px 6px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
 td:first-child,th:first-child{text-align:left}
 .tbl{overflow-x:auto;max-height:340px;margin-top:8px}
+
+/* ===== design pass v2 ===== */
+body{background:var(--paper);background-image:repeating-linear-gradient(0deg,transparent 0 31px,rgba(36,64,122,.05) 31px 32px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body{background-image:repeating-linear-gradient(0deg,transparent 0 31px,rgba(142,170,240,.06) 31px 32px)}}
+.sheet{box-shadow:0 1px 0 rgba(29,37,51,.04),0 10px 30px -18px rgba(29,37,51,.25);border-radius:6px}
+.hero{position:relative;padding:28px 22px 18px;background:var(--sheet);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--shu)}
+.hero::after{content:"出生届";position:absolute;right:16px;top:auto;bottom:14px;width:60px;height:60px;border:3px solid var(--shu);border-radius:50%;color:var(--shu);display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:14px;transform:rotate(-12deg);opacity:.55;pointer-events:none}
+.hero h1{font-size:clamp(40px,11vw,72px)}
+.hero .lead{font-size:16px;line-height:1.9}
+.counter{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;padding-right:0}
+.counter div{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:12px 14px;align-content:start}
+.counter b{font-size:34px;line-height:1.1;color:var(--ai)}
+.counter .label{margin-top:4px;line-height:1.5}
+#plays{text-align:center;margin-top:10px!important;font-family:var(--display);font-size:14px!important}
+#plays b{color:var(--shu);font-size:18px}
+.setup{gap:18px}
+.setup .label{font-weight:700;letter-spacing:.1em;color:var(--ink)}
+.setup .row .label+div,.setup .row .label+select,.setup .row .label+input{margin-top:2px}
+.btn{border-radius:4px;padding:14px 26px;font-size:16px;letter-spacing:.14em;box-shadow:0 6px 16px -8px rgba(36,64,122,.6)}
+#go{width:100%;padding:16px}
+.chip{padding:6px 14px;background:var(--sheet)}
+.top{box-shadow:0 8px 20px -14px rgba(29,37,51,.4);border-radius:6px}
+.age{font-size:38px;color:var(--ai)}
+.stat .bar{height:6px}
+.log{position:relative}
+.ev{position:relative;padding:9px 0 9px 4px;border-bottom:1px solid color-mix(in srgb,var(--rule) 60%,transparent)}
+.ev .a{position:relative}
+.ev .a::after{content:"";position:absolute;right:-7px;top:9px;width:6px;height:6px;border-radius:50%;background:var(--rule)}
+.ev.big .a::after{background:var(--ai);box-shadow:0 0 0 3px var(--ai-soft)}
+.ev.red .a::after{background:var(--shu);box-shadow:0 0 0 3px var(--shu-soft)}
+.ev.big{background:linear-gradient(90deg,var(--ai-soft),transparent 70%);border-radius:4px;padding-left:8px;margin-left:-4px}
+.ev.red.big{background:linear-gradient(90deg,var(--shu-soft),transparent 70%)}
+.decision{border-width:2px;box-shadow:0 12px 30px -16px rgba(200,55,45,.5);border-radius:6px}
+.decision h3{font-size:20px;line-height:1.5}
+.choice{padding:12px 14px;border-radius:4px;background:var(--sheet)}
+.choice:hover{background:var(--ai-soft)}
+.end h2{font-size:30px;line-height:1.25}
+.end h2 .num{color:var(--sub);font-weight:500}
+.lifetitle{font-family:var(--display);font-size:26px;font-weight:900;margin:6px 0 2px;padding:10px 14px;background:var(--ai-soft);border-left:4px solid var(--ai);border-radius:0 6px 6px 0;line-height:1.4}
+.rare{display:inline-flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:13px}
+.rare .rk{display:inline-block;background:var(--shu);color:#fff;font-family:var(--mono);font-weight:700;padding:1px 8px;border-radius:999px;font-size:12px;letter-spacing:.1em}
+.rare .st{color:#c9a227;letter-spacing:.05em}
+.rare .tg{color:var(--sub)}
+.facts{gap:14px 16px}
+.facts div{border-top:1px solid var(--rule);padding-top:8px}
+.facts b{font-size:21px}
+#cardwrap canvas{box-shadow:0 10px 30px -14px rgba(29,37,51,.4)}
+.mem div{padding:8px 0}
+.src{padding:16px 20px}
 </style>
 </head>
 <body>
@@ -1111,7 +1161,7 @@ function home(){
     <div class="row"><span class="label">1年の速さ</span>
       <div class="chips" id="spd">${[[6,"ゆっくり（1年6秒・約8分）"],[4,"ふつう（1年4秒・約5分半）"],[3,"はやい（1年3秒・約4分）"]].map(([v,t])=>`<button class="chip" aria-pressed="${v===S.speed}" data-v="${v}">${t}</button>`).join("")}</div></div>
     <div class="row"><span class="label">ニックネーム（任意。最期の記録とXの投稿に「プレイヤー：○○」と入ります）</span>
-      <input type="text" id="nick" maxlength="20" placeholder="例：るっち" value="${esc(nick())}" style="font-size:15px;max-width:260px"></div>
+      <input type="text" id="nick" maxlength="20" placeholder="ニックネーム" value="${esc(nick())}" style="font-size:15px;max-width:260px"></div>
     <div class="row"><span class="label">生まれる都道府県（任意。選ばなければ出生数に応じてランダム。市区町村はこちらで決めます）</span>
       <select id="bornpref"><option value="">ランダム</option>${P.map(p=>`<option>${p.full}</option>`).join("")}</select></div>
     <div class="row"><span class="label">生まれる年（統計は今のまま。暦年の出来事だけ変わる）</span>
@@ -1262,9 +1312,9 @@ function ending(){
     <div class="hanko stamp" style="top:20px">死亡<br>届出</div>
     <span class="label">最期の記録</span>
     <h2>${L.name}<br><span class="num" style="font-size:20px">${L.age}歳</span></h2>
-    <p style="font-family:var(--display);font-size:24px;font-weight:900;margin:4px 0 2px">「${esc(lifeTitle(L))}」</p>
+    <p class="lifetitle">「${esc(lifeTitle(L))}」</p>
     ${nick()?`<p class="muted" style="font-size:12px;margin:0">プレイヤー：${esc(nick())}</p>`:""}
-    <p class="muted" style="font-size:13px;margin:0 0 8px">${(()=>{const r=rarity(L);return `レア度 <b style="color:var(--shu)">${r.rank}</b> ${r.stars}　${esc(r.text)}の人生${r.tags.length?"　｜　"+esc(r.tags.join("・")):""}`})()}</p>
+    <p class="rare" style="margin:0 0 8px">${(()=>{const r=rarity(L);return `<span class="rk">${r.rank}</span><span class="st">${r.stars}</span><span>${esc(r.text)}の人生</span>${r.tags.length?`<span class="tg">｜ ${esc(r.tags.join("・"))}</span>`:""}`})()}</p>
     <p>${L.home}${L.town||""}に生まれ、${L.where===L.home?"その土地で":L.where+"で"}暮らした。${L.cause==="自殺"?"自ら命を絶った。":(L.causeDetail||L.cause)+"で亡くなった。"}${(L.assets-L.debt)<-100?`借金${yen(Math.abs(L.assets-L.debt))}を残した。${L.kids.length||L.married?"家族は相続放棄をした。":"相続人はいなかった。"}`:""}</p>
     <div class="facts">
       <div><span class="label">生きた年数</span><b>${L.age}年</b></div>
