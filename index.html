@@ -182,6 +182,16 @@ body{background:var(--paper);background-image:repeating-linear-gradient(0deg,tra
 #cardwrap canvas{box-shadow:0 10px 30px -14px rgba(29,37,51,.4)}
 .mem div{padding:8px 0}
 .src{padding:16px 20px}
+
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media (max-width:520px){.modes{grid-template-columns:1fr}}
+.mode{text-align:left;background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;color:var(--ink);display:grid;gap:2px}
+.mode b{font-family:var(--display);font-size:16px}.mode small{color:var(--sub);font-size:12px;line-height:1.4}
+.mode.on{border-color:var(--ai);background:var(--ai-soft);box-shadow:0 0 0 2px var(--ai) inset}
+@media (prefers-reduced-motion:no-preference){.ev.new{animation:evin .5s ease-out}.ev.new.big{animation:evbig .7s ease-out}}
+@keyframes evin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@keyframes evbig{0%{opacity:0;transform:translateY(-6px) scale(1.02);background:var(--ai-soft)}100%{opacity:1;transform:none}}
+.lifebar{height:6px;background:var(--rule);border-radius:3px;overflow:hidden;margin-top:2px}.lifebar i{display:block;height:100%;background:linear-gradient(90deg,var(--moss),var(--ai));transition:width .4s}
 </style>
 </head>
 <body>
@@ -1010,7 +1020,7 @@ function stepYear(L){
   if(F.gamble){const hard=F.gambleHard;const loss=hard?60+Math.floor(R()*120):10+Math.floor(R()*20);L.assets-=loss;if(R()<(hard?.5:.15))log(L,hard?pick([`${F.gamble}で今月${loss}万円負けた。生活費を借りた。`,`${F.gamble}の金を作るために、消費者金融を3社回った。`,`${L.married?L.partner+"に":"母に"}${F.gamble}の借金がばれた。`,`給料日に${F.gamble}で全部溶かした。`,"ギャンブル依存の自助グループに1回だけ行った。"]):pick([`${F.gamble}で${loss}万円負けた。`,`${F.gamble}で5万円勝った。トータルは負けている。`]),hard?"red":"");
     if(hard&&R()<.1){F.gamble=null;F.gambleHard=0;log(L,pick(["借金が500万円を超え、家族に土下座して、ギャンブルをやめた。自助グループに通っている。","家族に見放され、一人になってから、やめた。"]),"big");add(L,"j",5)}else if(hard&&L.married&&R()<.08)divorce(L,"ギャンブルの借金が原因で");}
   if(x>=45&&x<=65&&!F.care&&!F.momDead&&R()<.05){F.care=1;return decCare(L)}
-  if(x>=8&&x<=15&&R()<.055&&!F.bully){F.bully=1;log(L,`${pick(x>=13?["クラスの数人","部活の先輩","仲が良かったはずの友だち"]:["クラスの数人","上級生","仲が良かったはずの友だち"])}からいじめが始まった。${pick(["上履きが隠された。","LINEグループから外された。","机に落書きをされた。","無視された。"])}`,"red");log(L,`${pick(x>=13?["クラスの数人","部活の先輩","仲が良かったはずの友だち"]:["クラスの数人","上級生","仲が良かったはずの友だち"])}からいじめが始まった。${pick(["上履きが隠された。","LINEグループから外された。","机に落書きをされた。","無視された。"])}`,"red");add(L,"r",-10);add(L,"j",-12);return decBully(L)}
+  if(x>=8&&x<=15&&R()<.055&&!F.bully){F.bully=1;log(L,`${pick(x>=13?["クラスの数人","部活の先輩","仲が良かったはずの友だち"]:["クラスの数人","上級生","仲が良かったはずの友だち"])}からいじめが始まった。${pick(["上履きが隠された。","LINEグループから外された。","机に落書きをされた。","無視された。"])}`,"red");add(L,"r",-10);add(L,"j",-12);return decBully(L)}
   if(x===11&&!F.juken){F.juken=1;const urban=/東京|神奈川|埼玉|千葉|大阪|京都|兵庫|奈良|愛知|福岡|北海道|広島/.test(L.p.n);if((urban?.22:.06)*(L.home5>=4?1.8:L.home5===3?1:.4)>R())return decJuken(L)}
   if(x===12&&!L.ikkan)log(L,"地元の中学校に入った。");
   if(x===13){const map={"サッカー少年団":"サッカー部","少年野球":"野球部","ミニバス":"バスケ部","テニススクール":"テニス部","剣道":"剣道部","空手":"空手部","ピアノ":"吹奏楽部","バイオリン":"吹奏楽部","スイミング":"水泳部","体操教室":"体操部","習字":"書道部","バレエ":"ダンス部"};const from=(L.lessons||[]).map(l=>map[l]).filter(Boolean);
@@ -1504,7 +1514,10 @@ async function loadReviews(el){if(!REVIEW_API||!el)return;try{const r=await fetc
 async function postReview(body){const r=await fetch(REVIEW_API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(body)});return r.json()}
 const nick=()=>{try{return (localStorage.getItem("68man_nick")||"").trim().slice(0,20)}catch(e){return ""}};
 // ===== 状態 =====
-let S={view:"home",speed:4,L:null,others:[],timer:null,dec:null,pause:false,auto:false,breath:null,paths:true};
+let S={view:"home",speed:4,L:null,others:[],timer:null,dec:null,pause:false,auto:false,breath:null,paths:true,mode:"slow"};
+const MODES={slow:{speed:4,auto:false,label:"じっくり人生",desc:"自分で決めながら。1年4秒・約6分"},fast:{speed:.7,auto:false,label:"サクッと人生",desc:"大事な出来事だけ。約1分半"},auto:{speed:.45,auto:true,label:"全自動人生",desc:"選択も自動。眺めるだけ・約1分"}};
+function setMode(m){S.mode=m;S.speed=MODES[m].speed;S.auto=MODES[m].auto;try{localStorage.setItem("68man_mode",m)}catch(e){}}
+try{const mm=localStorage.getItem("68man_mode");if(mm&&MODES[mm])setMode(mm)}catch(e){}
 const MEMKEY="68man_mem_v2";
 function loadMem(){try{return JSON.parse(localStorage.getItem(MEMKEY)||"[]")}catch(e){return[]}}
 function saveMem(m){try{localStorage.setItem(MEMKEY,JSON.stringify(m.slice(0,10)))}catch(e){}}
@@ -1544,8 +1557,8 @@ function home(){
     <p class="muted" id="plays" hidden style="font-size:13px;margin-top:6px"></p>
   </header>
   <section class="sheet setup">
-    <div class="row"><span class="label">1年の速さ</span>
-      <div class="chips" id="spd">${[[6,"ゆっくり（1年6秒・約8分）"],[4,"ふつう（1年4秒・約5分半）"],[3,"はやい（1年3秒・約4分）"]].map(([v,t])=>`<button class="chip" aria-pressed="${v===S.speed}" data-v="${v}">${t}</button>`).join("")}</div></div>
+    <div class="row"><span class="label">遊び方</span>
+      <div class="modes" id="modes">${Object.entries(MODES).map(([k,m])=>`<button class="mode ${k===S.mode?"on":""}" data-m="${k}"><b>${m.label}</b><small>${m.desc}</small></button>`).join("")}</div></div>
     <div class="row"><span class="label">ニックネーム（任意。最期の記録とXの投稿に「プレイヤー：○○」と入ります）</span>
       <input type="text" id="nick" maxlength="20" placeholder="ニックネーム" value="${esc(nick())}" style="font-size:15px;max-width:260px"></div>
     <div class="row"><span class="label">生まれる都道府県（任意。選ばなければ出生数に応じてランダム。市区町村はこちらで決めます）</span>
@@ -1568,7 +1581,7 @@ function home(){
   const BI=31536000/686173,DI=31536000/1605378;
   S.cnt=setInterval(()=>{const s=(Date.now()-t0)/1000;const cb=$("#cb"),cd=$("#cd");if(!cb){clearInterval(S.cnt);return}
     cb.textContent=Math.floor(s/BI);cd.textContent=Math.floor(s/DI);$("#cbn").textContent=`次の赤ちゃんまで ${Math.ceil(BI-s%BI)}秒（46秒に1人）`;$("#cdn").textContent=`次まで ${Math.ceil(DI-s%DI)}秒（20秒に1人）`},250);
-  document.querySelectorAll("#spd .chip").forEach(b=>b.onclick=()=>{S.speed=+b.dataset.v;home()});
+  document.querySelectorAll("#modes .mode").forEach(b=>b.onclick=()=>{setMode(b.dataset.m);document.querySelectorAll("#modes .mode").forEach(x=>x.classList.toggle("on",x===b))});
   $("#mine").onchange=e=>{try{localStorage.setItem("68man_mine",e.target.value)}catch(_){}};
   loadReviews($("#reviews"));$("#go").onclick=()=>{try{localStorage.setItem("68man_nick",$("#nick").value.trim().slice(0,20))}catch(e){}birth(null,$("#bornpref").value||null,+$("#byear").value)};showPlays();
 }
@@ -1576,7 +1589,7 @@ function myPref(){try{return localStorage.getItem("68man_mine")||""}catch(e){ret
 
 function birth(prev,fp,by){
   clearInterval(S.cnt);
-  const L=newLife(false,prev,fp,by||(prev?(prev.birthYear||2024)+(prev.kids[0]?prev.kids[0].born:30):2024));S.L=L;S.others=[0,1,2,3].map(shadowLife);S.auto=false;
+  const L=newLife(false,prev,fp,by||(prev?(prev.birthYear||2024)+(prev.kids[0]?prev.kids[0].born:30):2024));S.L=L;S.others=[0,1,2,3].map(shadowLife);S.auto=MODES[S.mode].auto;S.speed=MODES[S.mode].speed;
   const pct=(L.p.b/TOTAL*100).toFixed(1),mine=myPref();
   app.innerHTML=`<section class="cert">
     <div class="hanko stamp">出生<br>届出</div>
@@ -1603,9 +1616,10 @@ function play(){S.shown=0;clearTimeout(S.revT);S.view="play";const L=S.L;
   app.innerHTML=`
   <div class="top">
     <div class="topline"><span class="age num" id="age">0<small>歳</small></span><span class="who">${furi(L.name)}</span><span class="muted" id="where">${L.home}</span><span class="muted" id="jobline"></span></div>
+    <div class="lifebar" title="人生の進み"><i id="lifebar" style="width:0%"></i></div>
     <div class="stats" id="stats"></div>
     <div class="ctrl"><button class="chip" id="pz" aria-pressed="false">一時停止</button><button class="chip" id="bgm" aria-pressed="${BGM.on}">♪</button>
-      <button class="chip" id="spdc">速さ：${({6:"ゆっくり",4:"ふつう",3:"はやい"})[S.speed]||S.speed+"秒"}</button>
+      <button class="chip" id="spdc">速さ：${({6:"ゆっくり",4:"ふつう",2:"はやい",.7:"サクッと",.45:"全自動"})[S.speed]||S.speed+"秒"}</button>
       <button class="chip" id="mode" aria-pressed="${S.auto}">全部おまかせ</button>
       <span class="label" style="margin-left:auto">今年の重点</span>
       <select id="focus" aria-label="今年の重点"><option value="r">人間関係</option><option value="k">勉強</option><option value="h">健康</option><option value="j">自分の時間</option></select>
@@ -1620,7 +1634,7 @@ function play(){S.shown=0;clearTimeout(S.revT);S.view="play";const L=S.L;
   </div>`;
   let mult=1;
   $("#pz").onclick=e=>{S.pause=!S.pause;e.target.setAttribute("aria-pressed",S.pause);e.target.textContent=S.pause?"再開":"一時停止"};
-  const SPD=[[6,"ゆっくり"],[4,"ふつう"],[3,"はやい"]];
+  const SPD=[[6,"ゆっくり"],[4,"ふつう"],[2,"はやい"],[.7,"サクッと"]];
   $("#spdc").onclick=e=>{let i=SPD.findIndex(x=>x[0]===S.speed);i=(i+1)%SPD.length;S.speed=SPD[i][0];e.target.textContent="速さ："+SPD[i][1];tick()};
   $("#mode").onclick=e=>{S.auto=!S.auto;e.target.setAttribute("aria-pressed",S.auto)};
   $("#focus").onchange=e=>L.focus=e.target.value;$("#bgm").onclick=e=>{if(BGM.on){BGM.stop()}else{BGM.start()}e.target.setAttribute("aria-pressed",BGM.on)};
@@ -1634,7 +1648,7 @@ function year(){
   if(d){const ask=!S.auto&&!d.auto&&(d.moral||S.paths);if(!ask)autoResolve(L,d);else{S.dec=d;showDec(d)}}
   if(S.dec||!L.alive)revealAll();render();if(!S.dec&&L.alive)revealNew();const last=L.events.slice(-3);BGM.mood=last.some(e=>/red/.test(e.cls))?-1:(L.st.j>55?1:0);
   if(!L.alive){clearInterval(S.timer);BGM.mood=-1;setTimeout(()=>{BGM.stop();ending()},1400);return}
-  if(BREATH[L.age]&&!S.auto&&!S.dec){S.breath=1;showBreath(L.age)}
+  if(BREATH[L.age]&&!S.auto&&S.speed>=1&&!S.dec){S.breath=1;showBreath(L.age)}
   if(!S.dec)L.age++;
 }
 function showDec(d){const L=S.L;
@@ -1650,10 +1664,11 @@ function showBreath(a){
   $("#bn").onclick=()=>{const v=$("#bt").value.trim();if(v){S.L.notes.push({a,t:v});S.L.events.push({a,t:"「"+v+"」",cls:"note"})}S.breath=null;$("#dec").innerHTML="";render()};
 }
 function jobLine(L){const a=L.age;if(a<15)return"";if(L.hs&&a<18)return L.hs.name;if(L.univ&&a<L.univGrad)return`${L.univ.name} ${L.fac}`;if(L.prison)return"服役中";if(L.job)return`${L.job}${L.company?"・"+L.company:""}`;return""}
-function renderLog(){const L=S.L;if(!$("#log"))return;const evs=L.events.filter(e=>e.t);if(S.shown==null||S.shown>evs.length)S.shown=evs.length;$("#log").innerHTML=evs.slice(0,S.shown).slice().reverse().map(e=>`<div class="ev ${e.cls}"><span class="a">${e.a}歳</span><p>${esc(e.t)}</p></div>`).join("")}
-function revealAll(){const L=S.L;S.shown=L.events.filter(e=>e.t).length;clearTimeout(S.revT)}
-function revealNew(){const L=S.L;const total=L.events.filter(e=>e.t).length;if(S.shown==null)S.shown=total;const n=total-S.shown;if(n<=0)return;clearTimeout(S.revT);const gap=Math.max(180,Math.min(1600,S.speed*1000/(n+1)));const step=()=>{if(!S.L||S.L!==L)return;if(S.shown<total){S.shown++;renderLog();if(S.shown<total)S.revT=setTimeout(step,gap)}};S.revT=setTimeout(step,Math.min(gap,400))}
-function render(){const L=S.L;if(!$("#age"))return;
+function visEvents(){const L=S.L;const evs=L.events.filter(e=>e.t);return S.speed<1?evs.filter(e=>/big|red|note/.test(e.cls)||e.a<=1):evs}
+function renderLog(){const L=S.L;if(!$("#log"))return;const evs=visEvents();if(S.shown==null||S.shown>evs.length)S.shown=evs.length;const vis=evs.slice(0,S.shown);$("#log").innerHTML=vis.slice().reverse().map((e,i)=>`<div class="ev ${e.cls}${i===0&&S._lastN!==vis.length?" new":""}"><span class="a">${e.a}歳</span><p>${esc(e.t)}</p></div>`).join("");S._lastN=vis.length}
+function revealAll(){S.shown=visEvents().length;clearTimeout(S.revT)}
+function revealNew(){const L=S.L;const total=visEvents().length;if(S.shown==null)S.shown=total;const n=total-S.shown;if(n<=0)return;clearTimeout(S.revT);const gap=Math.max(S.speed<1?90:180,Math.min(1600,S.speed*1000/(n+1)));const step=()=>{if(!S.L||S.L!==L)return;if(S.shown<total){S.shown++;renderLog();if(S.shown<total)S.revT=setTimeout(step,gap)}};S.revT=setTimeout(step,Math.min(gap,400))}
+function render(){const L=S.L;if(!$("#age"))return;if($("#lifebar"))$("#lifebar").style.width=Math.min(100,L.age)+"%";
   $("#age").innerHTML=`${L.age}<small>歳</small><small style="margin-left:8px;color:var(--sub)">${L.birthYear+L.age}年</small>`;$("#where").textContent=L.where===L.home?L.home+L.city:`${L.home}${L.city}生まれ・${L.where}暮らし`;$("#jobline").textContent=jobLine(L);
   $("#stats").innerHTML=[["h","健康"],["j","幸福"],["k","知識"],["r","人間関係"]].map(([k,n])=>`<div class="stat"><span>${n}<b class="num">${Math.round(L.st[k])}</b></span><div class="bar"><i style="width:${L.st[k]}%"></i></div></div>`).join("")
     +`<div class="stat money"><span>年収</span><b class="num">${L.age>=18?yen(L.income):"―"}</b></div><div class="stat money"><span>資産</span><b class="num" style="color:${(L.assets-L.debt)<0?"var(--shu)":"inherit"}">${L.age>=18?(L.assets-L.debt<0?"−":"")+yen(Math.abs(L.assets-L.debt)):"―"}</b></div>`;
