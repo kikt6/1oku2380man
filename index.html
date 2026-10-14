@@ -2072,7 +2072,7 @@ async function memDetail(id,local){let m,words=[];if(local){m=localMems().find(x
   if($("#wpost"))$("#wpost").onclick=async()=>{const t=$("#wt").value.trim();if(!t)return;$("#wpost").disabled=true;try{const d=await memApi(null,{type:"word",id,n:$("#wn").value.trim(),t});if(d.ok){$("#words").insertAdjacentHTML("afterbegin",`<div style="display:block"><p style="margin:0">${esc(t)}</p><span class="muted" style="font-size:11px">${esc($("#wn").value.trim()||"名無し")}・いま</span></div>`);$("#wt").value=""}}catch(e){}$("#wpost").disabled=false}}
 
 let S={view:"home",challenge:null,speed:4,L:null,others:[],timer:null,dec:null,pause:false,auto:false,breath:null,paths:true,mode:"slow"};
-const MODES={slow:{speed:4,auto:false,label:"じっくり人生",desc:"自分で決めながら。1年4秒・約6分"},fast:{speed:.7,auto:false,label:"サクッと人生",desc:"大事な出来事だけ。約1分半"},auto:{speed:.45,auto:true,label:"全自動人生",desc:"選択も自動。眺めるだけ・約1分"}};
+const MODES={slow:{speed:6.5,auto:false,label:"じっくり人生",desc:"自分で決めながら。1年6.5秒・約10分"},fast:{speed:2.3,auto:false,label:"サクッと人生",desc:"大事な出来事だけ。約3分"},auto:{speed:2.3,auto:true,label:"全自動人生",desc:"選択も自動。眺めるだけ・約3分"}};
 function setMode(m){S.mode=m;S.speed=MODES[m].speed;S.auto=MODES[m].auto;try{localStorage.setItem("68man_mode",m)}catch(e){}}
 try{const mm=localStorage.getItem("68man_mode");if(mm&&MODES[mm])setMode(mm)}catch(e){}
 const MEMKEY="68man_mem_v2";
@@ -2193,7 +2193,7 @@ function play(){S.shown=0;clearTimeout(S.revT);S.view="play";const L=S.L;
     <div class="topline"><span class="age num" id="age">0<small>歳</small></span><span class="who">${furi(L.name)}</span><span class="muted" id="where">${L.home}</span><span class="muted" id="jobline"></span></div>
     <div class="lifebar" title="人生の進み"><i id="lifebar" style="width:0%"></i></div>
     ${S.challenge?`<div class="chalbar" id="chalbar"></div>`:""}
-    <div class="ctrl"><div class="seg"><button id="pz" aria-pressed="false" aria-label="一時停止">❚❚</button>${[[4,"1×"],[2,"2×"],[.7,"6×"],[.3,"12×"]].map(([v,t])=>`<button class="spd" data-v="${v}" aria-pressed="${v===S.speed}">${t}</button>`).join("")}</div><button class="chip" id="skip" title="次の大きな出来事まで進む">次へ »</button><button class="chip" id="more" aria-label="その他">⋯</button></div>
+    <div class="ctrl"><div class="seg"><button id="pz" aria-pressed="false" aria-label="一時停止">❚❚</button>${(b=>[[b,"1×"],[+(b/2).toFixed(3),"2×"],[+(b/6).toFixed(3),"6×"],[+(b/12).toFixed(3),"12×"]])(MODES[S.mode].speed).map(([v,t])=>`<button class="spd" data-v="${v}" aria-pressed="${v===S.speed}">${t}</button>`).join("")}</div><button class="chip" id="skip" title="次の大きな出来事まで進む">次へ »</button><button class="chip" id="more" aria-label="その他">⋯</button></div>
     <div class="moremenu" id="moremenu" hidden><button class="chip" id="mode" aria-pressed="${S.auto}">選択もおまかせ</button><button class="chip" id="bgm" aria-pressed="${BGM.on}">♪ 音楽</button><button class="chip" id="quit">この人生をやめる</button></div>
   </div>
   ${(()=>{try{return localStorage.getItem("68man_tip1")?"":`<div class="tip" id="tip">速く進めたいときは 2× か 6× を。「次へ」で次の大きな出来事まで飛ばせます。大切な決断が来ると、時間が止まります。<button id="tipx" aria-label="閉じる">×</button></div>`}catch(e){return""}})()}
@@ -2226,7 +2226,7 @@ function year(){
   if(d){const ask=!S.auto&&!d.auto&&(d.moral||S.paths);if(!ask)autoResolve(L,d);else{S.dec=d;showDec(d)}}
   if(S.dec||!L.alive)revealAll();render();if(!S.dec&&L.alive)revealNew();const last=L.events.slice(-3);BGM.mood=last.some(e=>/red/.test(e.cls))?-1:(L.st.j>55?1:0);
   if(!L.alive){clearInterval(S.timer);BGM.mood=-1;setTimeout(()=>{BGM.stop();ending()},1400);return}
-  if(BREATH[L.age]&&!S.auto&&S.speed>=1&&!S.dec){S.breath=1;showBreath(L.age)}
+  if(BREATH[L.age]&&S.mode==="slow"&&S.speed>=1&&!S.dec){S.breath=1;showBreath(L.age)}
   if(!S.dec)L.age++;
 }
 function showDec(d){const L=S.L;
