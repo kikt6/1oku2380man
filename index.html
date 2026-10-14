@@ -7,14 +7,15 @@
 <meta property="og:title" content="1億2380万分の1 ― 日本で生まれ、一度きりの人生を生きる">
 <meta property="og:description" content="どこに、誰の子として生まれるかは選べません。実際の統計で決まる、日本版人生シミュレーション。">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://kikt6.github.io/1oku2380man/">
 <meta property="og:image" content="https://kikt6.github.io/1oku2380man/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta property="og:url" content="https://kikt6.github.io/1oku2380man/">
 <meta name="twitter:image" content="https://kikt6.github.io/1oku2380man/og.png">
 <meta name="theme-color" content="#24407a">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
+<script data-goatcounter="https://1oku2380man.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <style>:root{color-scheme:light dark}body{margin:0;font-size:14px;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>1億2380万分の1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -736,7 +737,7 @@ function stepYear(L){
   if(x>=55&&x<=65&&R()<.03){log(L,"親の介護のために離職した。","red");L.job="無職";add(L,"j",-8)}
   if(x===65&&L.job&&JOBS[L.job].reg){L.retired=true;log(L,`定年を迎えた。退職金${L.company?1500+Math.floor(R()*1500):600}万円。`,"big");L.assets+=L.company?1500+Math.floor(R()*1500):600;L.job=R()<.5?"無職":L.job;if(L.job!=="無職")log(L,"再雇用で働き続けることにした。")}
   if(x>=35&&x<=60&&R()<.03)log(L,pick(["PTA会長を押しつけられた。1年で5kg痩せた。","町内会の役員になり、祭りの寄付集めで休日が消えた。","子どもの少年野球のコーチを頼まれ、毎週末グラウンドにいた。","マンションの管理組合の理事長になった。修繕積立金で揉めた。","市議会議員選挙に出た。"+(R()<.3?"最下位で当選した。":"落選した。供託金30万円が没収された。"),"消防団に入った。年に3回、朝まで飲んだ。","地元のマラソン大会の運営を手伝った。"]));
-  if(/当選した/.test(L.events[L.events.length-1].t)&&!F.giin){F.giin=1;L.flags.prevJob=L.job;L.job="公務員";L.company="市議会議員";log(L,"市議会議員になった。議員報酬は月40万円。4年後の選挙で落ちた。","big")}
+  if(/最下位で当選した/.test(L.events[L.events.length-1].t)&&!F.giin){F.giin=1;L.flags.prevJob=L.job;L.job="公務員";L.company="市議会議員";log(L,"市議会議員になった。議員報酬は月40万円。4年後の選挙で落ちた。","big")}
   if(L.divorced&&!L.married&&x>=30&&x<=55&&R()<.06){const ps=L.sex==="M"?"F":"M";const p2=person(ps);L.married=true;L.partner=p2;L.divorced=false;L.mar=x;L.flags.pendMar=0;const step=R()<.5;log(L,`${p2}と再婚した。${step?`相手には${pick(["小学生の娘","中学生の息子","3歳の子"])}がいた。${pick(["最初は「おじさん」と呼ばれた。","名前で呼ばれるまで2年かかった。","連れ子に「本当の親じゃない」と言われた夜があった。"])}`:""}`,"big");add(L,"j",8)}
   if(!L.married&&!L.divorced&&x>=28&&x<=45&&!F.samesex&&R()<.008){F.samesex=1;const pn=person(L.sex);log(L,`${pn}と暮らしはじめた。同性のパートナー。${pick(["親には「ルームシェア」と言っている。","パートナーシップ制度のある市に引っ越した。","友人には全員話した。会社には話していない。","病院で「家族ではない」と言われ、面会できなかった。"])}`,"big");L.flags.partnerName=pn;add(L,"j",8);add(L,"r",5)}
   if(F.samesex&&L.flags.partnerName&&R()<.1)log(L,pick([`${L.flags.partnerName}と海外で結婚式を挙げた。日本では婚姻届は出せない。`,`${L.flags.partnerName}の親に初めて会った。`,"遺言書を書いた。法律上は他人だから。",`${L.flags.partnerName}と家を買った。ペアローンは組めなかった。`]));
@@ -790,7 +791,7 @@ function decWallet(L){const amt=3+Math.floor(R()*20);return{moral:1,title:`道�
 function decRescue(L){const sc=pick([["駅のホームで人が倒れた。周りは誰も動かない。","AEDを取りに走り、駅員が来るまで心臓マッサージを続けた","倒れた人"],["川で子どもが溺れている。","服のまま飛び込み、岸まで引き上げた","子ども"],["夜道で、男が女性に怒鳴っている。","間に割って入り、110番した","女性"],["踏切の中で、高齢者が立ちすくんでいる。遮断機は下りている。","非常ボタンを押してから、遮断機をくぐって引っ張り出した","高齢者"],["隣の家が燃えている。中に人がいると叫んでいる。","濡らしたタオルを口に当てて中に入り、寝ていた高齢者を背負って出た","高齢者"],["海で、離岸流に流されている人がいる。","浮き輪を持って泳ぎ、沖に流されながら岸と平行に泳いで戻った","流されていた人"]]);L.flags.rescueScene=sc;return{moral:1,title:sc[0],text:"",opts:[
   {t:"助ける",w:2,f(){const sc=L.flags.rescueScene;const r=R();if(r<.04){L.alive=false;L.cause="人を助けようとして";log(L,`${sc[1]}。自分が死んだ。${pick([sc[2]+"は助かった。","二人とも助からなかった。"])}${L.age}歳。`,"red big");return}if(r<.12){log(L,`${sc[1]}。${sc[2]}は助かったが、自分は${pick(["肋骨を3本折った","全身に火傷を負った","殴られて前歯を折った","肺に水が入って2週間入院した"])}。`,"red");add(L,"h",-15)}else if(r<.2){log(L,`${sc[1]}。間に合わなかった。${sc[2]}は亡くなった。しばらく眠れなかった。`,"red");add(L,"j",-8)}else{log(L,`${sc[1]}。${sc[2]}は助かった。後日、${pick(["警察署で感謝状をもらった","消防署から表彰された","本人の家族が菓子折りを持って訪ねてきた","地元の新聞に小さく載った"])}。`,"big");add(L,"j",8);add(L,"r",5)}}},
   {t:"通報だけして立ち去る",w:2,f(){const sc=L.flags.rescueScene;log(L,`119番だけして、その場を離れた。${sc[2]}がどうなったかは知らない。${pick(["翌日のニュースを見られなかった。","あとで「助かった」と聞いて、少しほっとした。",""])}`);add(L,"j",-2)}}]}}
-function decFraud(L){return{moral:1,title:`${L.company||"会社"}で、上司の${person("M")}が数字を改ざんしているのに気づいた。`,text:"",opts:[
+function decFraud(L){return{moral:1,title:`勤め先で、上司の${person("M")}が数字を改ざんしているのに気づいた。`,text:"",opts:[
   {t:"内部通報する",w:1,f(){if(R()<.5){log(L,"通報が認められ、上司は懲戒解雇になった。自分は閑職に回された。","red");add(L,"j",-5)}else{log(L,"不正が明るみに出て、会社から感謝された。","big");add(L,"j",6);L.flags.promo=Math.max(L.flags.promo||1,1.25)}}},
   {t:"黙っている",w:2,f(){if(R()<.3){log(L,"数年後、不正が発覚した。知っていたことが問題になり、減給処分を受けた。","red");add(L,"j",-8)}else{log(L,"黙っていた。何も起きなかった。");add(L,"j",-2)}}},
   {t:"自分も加担する",w:.5,f(){if(R()<.5){log(L,"不正に加担した。発覚して懲戒解雇、損害賠償を求められた。","red big");L.job="無職";L.company="";L.assets-=800;add(L,"j",-20)}else{log(L,"不正に加担した。ボーナスが増えた。","red");L.assets+=200;add(L,"j",-5)}}}]}}
@@ -964,6 +965,99 @@ function status(L){if(!L.alive)return`${L.age}歳で亡くなった（${L.cause}
   const a=L.age;let s=a<6?"幼児":a<12?"小学生":a<15?"中学生":a<18?(L.hs?L.hs.name:"高校生"):L.univ&&a<L.univGrad?L.univ.name+" "+L.fac:L.prison?"服役中":L.retired?"引退後":(L.job||"無職");
   if(a>=20&&L.income)s+=`・年収${L.income}万`;if(a>=18)s+=L.married?"・既婚":L.divorced?"・離婚歴":"・未婚";if(L.kids.length)s+=`・子${L.kids.length}`;return s}
 
+
+// ===== 人生タイトル・レア度 =====
+function evHas(L,re){return L.events.some(e=>e.t&&/big|red/.test(e.cls||"")&&re.test(e.t))}
+function lifeTitle(L){
+  const F=L.flags,net=L.assets-L.debt,isPro=JOBS[L.job]&&JOBS[L.job].pro,tl=(F.titles||[]).join(" ");
+  const everPro=isPro||evHas(L,/ドラフト|契約金|戦力外|プロ契約/);
+  const rules=[
+    [/ノーベル/.test(tl),"人類に名を刻んだ人"],
+    [L.age<1,"一度だけ泣いた命"],
+    [L.age<20,"早すぎた別れ"],
+    [L.cause==="自殺","静かに去った人"],
+    [everPro&&/優勝|MVP|首位|王|代表/.test(tl),"頂点を見た人"],
+    [everPro,"グラウンドに立った人"],
+    [/アイドル|芸人|俳優|タレント|YouTuber|インフルエンサー/.test(L.job)||evHas(L,/紅白|CDデビュー|登録者100万/),"画面の向こうに行った人"],
+    [L.job==="プロゲーマー","ゲームで食べた人"],
+    [F.giin,"選ばれた人"],
+    [L.job==="暴力団員"||evHas(L,/組員になった|盃を/),"裏街道を歩いた人"],
+    [L.job==="服役中"||evHas(L,/逮捕され.*懲役|実刑判決/),"塀の中を知った人"],
+    [net>=100000,"10億を遺した人"],
+    [net>=10000,"億を築いた人"],
+    [L.job==="研究者"&&/賞/.test(tl),"賞を取った学者"],
+    [F.phd,"博士になった人"],
+    [L.fac==="医学部"&&L.univ,"白衣を着た人"],
+    [F.stuBizWin,"学生で会社を売った人"],
+    [net<-1000,"借金を残した人"],
+    [F.seihoNow||evHas(L,/生活保護を申請|生活保護の受給/),"底から生き抜いた人"],
+    [(F.roninN||0)>=3,`${F.roninN}浪した人`],
+    [L.univ&&/東京大学|京都大学/.test(L.univ.name),L.univ?L.univ.name.slice(0,2)+"に行った人":""],
+    [L.age>=100,"百年を生きた人"],
+    [L.kids.length>=4,"大家族の人"],
+    [L.divorced&&evHas(L,/再婚/),"二度結婚した人"],
+    [L.job==="経営者","会社を興した人"],
+    [F.abroad,"海を渡った人"],
+    [evHas(L,/感謝状/),"誰かを助けた人"],
+    [!L.married&&L.age>=50,"ひとりで生きた人"],
+    [L.job==="看護師","夜勤を生きた人"],
+    [/教員/.test(L.job),"教壇に立った人"],
+    [L.job==="農家","土と生きた人"],
+    [L.job==="公務員","役所で生きた人"],
+    [L.job==="主婦・主夫","家を守った人"],
+    [L.job==="フリーター","定まらなかった人"],
+    [L.job==="無職","働かなかった人"],
+    [L.job==="医師","命を預かった人"],
+    [L.job==="警察官","街を守った人"],
+    [L.kids.length>=1&&L.age>=80,"孫に看取られた人"],
+  ];
+  const r=rules.find(x=>x[0]);return r?r[1]:"ふつうの、一度きりの人";
+}
+function rarity(L){
+  const F=L.flags,net=L.assets-L.debt,tl=(F.titles||[]).join(" "),isPro=JOBS[L.job]&&JOBS[L.job].pro;
+  const c=[
+    [/ノーベル/.test(tl),1e-6,"ノーベル賞"],
+    [isPro||evHas(L,/ドラフト|プロ契約/),.02,"プロ選手"],
+    [/MLB|NBA|メジャー/.test(tl)||evHas(L,/メジャー移籍|NBAに/),.02,"海外トップリーグ"],
+    [/アイドル|芸人|俳優|タレント/.test(L.job)||evHas(L,/紅白|CDデビュー/),.005,"芸能界"],
+    [/YouTuber|インフルエンサー/.test(L.job),.008,"配信で食べた"],
+    [L.job==="プロゲーマー",.005,"プロゲーマー"],
+    [F.giin,.03,"議員当選"],
+    [L.univ&&/東京大学|京都大学/.test(L.univ.name),.06,"東大・京大"],
+    [L.fac==="医学部"&&L.univ,.008,"医学部"],
+    [F.phd,.02,"博士号"],
+    [F.stuBizWin,.006,"学生起業で売却"],
+    [net>=100000,.003,"資産10億"],
+    [net>=10000&&net<100000,.15,"資産1億"],
+    [net<-3000,.12,"借金3000万"],
+    [L.age>=100,.025,"100歳超え"],
+    [L.age<1,.002,"生後まもなく"],
+    [L.age>=1&&L.age<20,.007,"20歳前に死去"],
+    [(F.roninN||0)>=3,.01,`${F.roninN}浪`],
+    [L.job==="暴力団員"||evHas(L,/組員になった|盃を/),.015,"暴力団"],
+    [L.job==="服役中"||evHas(L,/逮捕され.*懲役|実刑判決/),.05,"服役"],
+    [evHas(L,/冤罪だと今も/),.01,"冤罪"],
+    [L.kids.length>=4,.04,"子4人以上"],
+    [L.cause==="自殺",.07,"自死"],
+    [evHas(L,/宝くじで1等が当たった/),1e-4,"宝くじ高額当選"],
+    [evHas(L,/家が全壊した|アパートが倒壊し/),.15,"災害で家を失う"],
+    [evHas(L,/感謝状/),.04,"人命救助"],
+    [L.edu==="中卒"||(!L.hs&&L.age>=16),.08,"中卒"],
+    [evHas(L,/再婚/)&&L.divorced,.05,"再婚"],
+    [F.abroad,.08,"海外赴任"],
+    [evHas(L,/同性/),.03,"同性パートナー"],
+  ].filter(x=>x[0]);
+  let p=1;c.forEach(x=>p*=x[1]);p=Math.max(p,1e-8);
+  const one=Math.round(1/p);const n=one>=1e8?"1億人に1人":one>=1e4?Math.round(one/1e4)+"万人に1人":one>=1000?Math.round(one/100)*100+"人に1人":one>=10?one+"人に1人":"よくある";
+  const rank=p<=1e-5?"SSR":p<=1e-3?"SR":p<=3e-2?"R":p<.5?"UC":"N";
+  const stars={"SSR":"★★★★★","SR":"★★★★☆","R":"★★★☆☆","UC":"★★☆☆☆","N":"★☆☆☆☆"}[rank];
+  return{rank,stars,p,text:n,tags:c.map(x=>x[2])};
+}
+
+// ===== 計測（GoatCounter。未設定なら何もしない） =====
+const GC="https://1oku2380man.goatcounter.com";
+function track(path,title){try{if(window.goatcounter&&goatcounter.count)goatcounter.count({path,title,event:true})}catch(e){}}
+function showPlays(){try{if(!window.goatcounter)return;fetch(GC+"/counter/life-start.json").then(r=>r.json()).then(d=>{const el=$("#plays");if(el&&d&&d.count){el.hidden=false;el.innerHTML=`これまでに <b class="num">${String(d.count).replace(/[^\d]/g,"")}</b> 人がここで生まれました`}}).catch(()=>{})}catch(e){}}
 // ===== 状態 =====
 let S={view:"home",speed:4,L:null,others:[],timer:null,dec:null,pause:false,auto:false,breath:null,paths:false};
 const MEMKEY="68man_mem_v2";
@@ -1002,6 +1096,7 @@ function home(){
       <div><b class="num" id="cb">0</b><span class="label">このページを開いてから<br>日本で生まれた赤ちゃん<br><span id="cbn">次の赤ちゃんまで 46秒</span></span></div>
       <div><b class="num" id="cd">0</b><span class="label">同じ時間に<br>亡くなった人<br><span id="cdn">次まで 20秒</span></span></div>
     </div>
+    <p class="muted" id="plays" hidden style="font-size:13px;margin-top:6px"></p>
   </header>
   <section class="sheet setup">
     <div class="row"><span class="label">1年の速さ</span>
@@ -1023,7 +1118,7 @@ function home(){
     cb.textContent=Math.floor(s/BI);cd.textContent=Math.floor(s/DI);$("#cbn").textContent=`次の赤ちゃんまで ${Math.ceil(BI-s%BI)}秒（46秒に1人）`;$("#cdn").textContent=`次まで ${Math.ceil(DI-s%DI)}秒（20秒に1人）`},250);
   document.querySelectorAll("#spd .chip").forEach(b=>b.onclick=()=>{S.speed=+b.dataset.v;home()});
   $("#mine").onchange=e=>{try{localStorage.setItem("68man_mine",e.target.value)}catch(_){}};
-  $("#go").onclick=()=>birth(null,$("#bornpref").value||null,+$("#byear").value);
+  $("#go").onclick=()=>birth(null,$("#bornpref").value||null,+$("#byear").value);showPlays();
 }
 function myPref(){try{return localStorage.getItem("68man_mine")||""}catch(e){return""}}
 
@@ -1049,7 +1144,7 @@ function birth(prev,fp,by){
     ${L.prevLife?`<p class="muted" style="margin-top:14px;font-size:13px">前世の${esc(L.prevLife)}の子として生まれた。</p>`:""}${mine?`<p class="muted" style="margin-top:14px;font-size:13px">あなたは${esc(mine)}生まれ。${mine===L.home?"同じ県に生まれた。":"今回は違う土地に生まれた。"}</p>`:""}
   </section>
   <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="start">人生を始める</button><button class="btn ghost" id="back">やめる</button></div>`;
-  $("#start").onclick=()=>{const v=$("#nm").value.trim();if(v)L.name=v;let want="1";try{want=localStorage.getItem("68man_bgm")??"1"}catch(e){}if(want==="1")BGM.start();play()};$("#back").onclick=home;
+  $("#start").onclick=()=>{const v=$("#nm").value.trim();if(v)L.name=v;let want="1";try{want=localStorage.getItem("68man_bgm")??"1"}catch(e){}if(want==="1")BGM.start();track("life-start","人生を始めた");play()};$("#back").onclick=home;
 }
 
 function play(){S.view="play";const L=S.L;
@@ -1057,9 +1152,9 @@ function play(){S.view="play";const L=S.L;
   <div class="top">
     <div class="topline"><span class="age num" id="age">0<small>歳</small></span><span class="who">${furi(L.name)}</span><span class="muted" id="where">${L.home}</span><span class="muted" id="jobline"></span></div>
     <div class="stats" id="stats"></div>
-    <div class="ctrl"><button class="chip" id="pz" aria-pressed="false">一時停止</button><button class="chip" id="bgm" aria-pressed="${BGM.on}">♪ ${BGM.on?"音楽ON":"音楽OFF"}</button>
-      ${[[6,"ゆっくり"],[4,"ふつう"],[3,"はやい"],[.2,"0.2秒"]].map(([v,t])=>`<button class="chip spd" data-v="${v}" aria-pressed="${v===S.speed}">${t}</button>`).join("")}
-      <button class="chip" id="au" aria-pressed="false">受験校も自分で決める</button><button class="chip" id="au2" aria-pressed="false">全部おまかせ</button>
+    <div class="ctrl"><button class="chip" id="pz" aria-pressed="false">一時停止</button><button class="chip" id="bgm" aria-pressed="${BGM.on}">♪</button>
+      <button class="chip" id="spdc">速さ：${({6:"ゆっくり",4:"ふつう",3:"はやい"})[S.speed]||S.speed+"秒"}</button>
+      <button class="chip" id="mode">${S.auto?"全部おまかせ":S.paths?"受験校も決める":"決めるのは善悪だけ"}</button>
       <span class="label" style="margin-left:auto">今年の重点</span>
       <select id="focus" aria-label="今年の重点"><option value="r">人間関係</option><option value="k">勉強</option><option value="h">健康</option><option value="j">自分の時間</option></select>
     </div>
@@ -1073,9 +1168,10 @@ function play(){S.view="play";const L=S.L;
   </div>`;
   let mult=1;
   $("#pz").onclick=e=>{S.pause=!S.pause;e.target.setAttribute("aria-pressed",S.pause);e.target.textContent=S.pause?"再開":"一時停止"};
-  document.querySelectorAll(".spd").forEach(b=>b.onclick=()=>{S.speed=+b.dataset.v;document.querySelectorAll(".spd").forEach(x=>x.setAttribute("aria-pressed",x===b));tick()});
-  $("#au").onclick=e=>{S.paths=!S.paths;e.target.setAttribute("aria-pressed",S.paths)};$("#au2").onclick=e=>{S.auto=!S.auto;e.target.setAttribute("aria-pressed",S.auto)};
-  $("#focus").onchange=e=>L.focus=e.target.value;$("#bgm").onclick=e=>{if(BGM.on){BGM.stop()}else{BGM.start()}e.target.setAttribute("aria-pressed",BGM.on);e.target.textContent=BGM.on?"♪ 音楽ON":"♪ 音楽OFF"};
+  const SPD=[[6,"ゆっくり"],[4,"ふつう"],[3,"はやい"]];
+  $("#spdc").onclick=e=>{let i=SPD.findIndex(x=>x[0]===S.speed);i=(i+1)%SPD.length;S.speed=SPD[i][0];e.target.textContent="速さ："+SPD[i][1];tick()};
+  $("#mode").onclick=e=>{const m=((S.auto?2:S.paths?1:0)+1)%3;/* 0:善悪だけ 1:受験校も 2:全部おまかせ */S.paths=m===1;S.auto=m===2;e.target.textContent=m===0?"決めるのは善悪だけ":m===1?"受験校も決める":"全部おまかせ"};
+  $("#focus").onchange=e=>L.focus=e.target.value;$("#bgm").onclick=e=>{if(BGM.on){BGM.stop()}else{BGM.start()}e.target.setAttribute("aria-pressed",BGM.on)};
   function tick(){clearInterval(S.timer);S.timer=setInterval(year,S.speed*1000/mult)}
   S.tick=tick;render();year();tick();
 }
@@ -1122,7 +1218,30 @@ function drawCurve(){const c=$("#cv");if(!c)return;const L=S.L,g=c.getContext("2
   for(let x=0;x<=110;x++){pts.push([x,s]);x===0?g.moveTo(X(x),Y(s)):g.lineTo(X(x),Y(s));s*=1-Math.min(1,qOf(L.lt.a,x,L.lt.q0))}g.stroke();
   const p=pts[Math.min(L.age,110)];g.fillStyle=L.alive?ai:shu;g.beginPath();g.arc(X(p[0]),Y(p[1]),7,0,7);g.fill();
 }
+
+function drawCard(L){
+  const W=1200,H=630,cv=document.createElement("canvas");cv.width=W;cv.height=H;const g=cv.getContext("2d");
+  const title=lifeTitle(L),ra=rarity(L),net=L.assets-L.debt;
+  g.fillStyle="#fbfcfd";g.fillRect(0,0,W,H);g.fillStyle="#eef1f4";g.fillRect(0,0,W,14);g.fillRect(0,H-14,W,14);
+  g.strokeStyle="#cfd6e0";g.lineWidth=2;g.strokeRect(36,36,W-72,H-72);
+  g.fillStyle="#5b6577";g.font="500 22px 'Zen Kaku Gothic New',sans-serif";g.fillText("1億2380万分の1　―　最期の記録",70,90);
+  g.fillStyle="#1d2533";g.font="900 64px 'Zen Old Mincho',serif";g.fillText(title,70,180);
+  g.font="700 40px 'Zen Old Mincho',serif";g.fillText(`${L.name}　${L.age}歳`,70,245);
+  g.fillStyle="#5b6577";g.font="500 24px 'Zen Kaku Gothic New',sans-serif";
+  const path=[L.home+(L.town||"")+"生まれ",L.hs?L.hs.name.replace(/\(.*$/,""):null,L.univ?L.univ.name+(L.fac?" "+L.fac:""):L.edu==="専門"?"専門学校":null,L.job||"無職"].filter(Boolean).join(" → ");
+  const wrap=(s,max)=>{const out=[];let cur="";for(const ch of s){cur+=ch;if(g.measureText(cur).width>max){out.push(cur);cur=""}}if(cur)out.push(cur);return out};
+  let y=300;wrap(path,W-140).forEach(l=>{g.fillText(l,70,y);y+=34});
+  y+=10;g.fillStyle="#1d2533";g.font="500 26px 'Zen Kaku Gothic New',sans-serif";
+  const facts=[`死因：${L.cause==="自殺"?"自死":(L.causeDetail||L.cause)}`,`生涯年収 ${yen(L.lifetime)}　遺した資産 ${(net<0?"−":"")+yen(Math.abs(net))}`,`${L.partner?L.partner+"と結婚":"生涯独身"}${L.kids.length?"・子"+L.kids.length+"人":""}`];
+  facts.forEach(f=>{g.fillText(f,70,y);y+=38});
+  g.fillStyle="#c8372d";g.font="700 28px 'Zen Kaku Gothic New',sans-serif";g.fillText(`${ra.stars}　${ra.text}の人生`,70,H-80);
+  g.save();g.translate(W-150,130);g.rotate(-.12);g.strokeStyle="#c8372d";g.lineWidth=5;g.strokeRect(-60,-60,120,120);g.fillStyle="#c8372d";g.font="900 44px 'Zen Old Mincho',serif";g.textAlign="center";g.fillText("死亡",0,-6);g.fillText("届出",0,42);g.restore();
+  g.fillStyle="#9aa4b5";g.font="500 18px 'IBM Plex Mono',monospace";g.textAlign="right";g.fillText("kikt6.github.io/1oku2380man",W-70,H-80);
+  return cv;
+}
+
 function ending(){
+  track("life-end","人生を終えた");
   const L=S.L,le=L.sex==="M"?L.p.leM:L.p.leF,diff=(L.age-le).toFixed(1),wk=wakatte(L);
   const mem=loadMem();mem.unshift({name:L.name,pref:L.home,age:L.age,cause:L.cause,job:L.job});saveMem(mem);
   const lastJob=[...L.events].reverse().find(e=>/就職|働きはじめた|転職|組員|昇進/.test(e.t));
@@ -1131,6 +1250,8 @@ function ending(){
     <div class="hanko stamp" style="top:20px">死亡<br>届出</div>
     <span class="label">最期の記録</span>
     <h2>${L.name}<br><span class="num" style="font-size:20px">${L.age}歳</span></h2>
+    <p style="font-family:var(--display);font-size:24px;font-weight:900;margin:4px 0 2px">「${esc(lifeTitle(L))}」</p>
+    <p class="muted" style="font-size:13px;margin:0 0 8px">${(()=>{const r=rarity(L);return `レア度 <b style="color:var(--shu)">${r.rank}</b> ${r.stars}　${esc(r.text)}の人生${r.tags.length?"　｜　"+esc(r.tags.join("・")):""}`})()}</p>
     <p>${L.home}${L.town||""}に生まれ、${L.where===L.home?"その土地で":L.where+"で"}暮らした。${L.cause==="自殺"?"自ら命を絶った。":(L.causeDetail||L.cause)+"で亡くなった。"}${(L.assets-L.debt)<-100?`借金${yen(Math.abs(L.assets-L.debt))}を残した。${L.kids.length||L.married?"家族は相続放棄をした。":"相続人はいなかった。"}`:""}</p>
     <div class="facts">
       <div><span class="label">生きた年数</span><b>${L.age}年</b></div>
@@ -1151,7 +1272,7 @@ function ending(){
     <div class="row"><label class="label" for="lw">この人にひとこと</label><input type="text" id="lw" placeholder="おつかれさま"></div>
     <div class="facts" id="report"></div>
     <div id="mine-life"></div>
-    <div class="row"><span class="label">この人生を共有する</span><textarea id="share" rows="4" readonly></textarea><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" id="tweet" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">Xに投稿する</a><button class="btn ghost" id="copy">コピー</button></div></div>
+    <div class="row"><span class="label">この人生を共有する</span><textarea id="share" rows="4" readonly></textarea><div id="cardwrap" style="margin:8px 0"></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="savecard">画像を保存</button><a class="btn" id="tweet" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">Xに投稿する</a><button class="btn ghost" id="copy">コピー</button></div></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="again">もう一度生まれる</button>${L.kids.some(k=>!k.dead)?`<button class="btn" id="rebirth">この人の子として生まれ直す</button>`:""}<button class="btn ghost" id="tohome">はじめに戻る</button></div>
   </section>
   <section class="sheet"><span class="label">人生の記録</span><div class="log" style="max-height:none">${L.events.filter(e=>e.t).map(e=>`<div class="ev ${e.cls}"><span class="a">${e.a}歳</span><p>${esc(e.t)}</p></div>`).join("")}</div></section>`;
@@ -1164,7 +1285,8 @@ function ending(){
       $("#mine-life").innerHTML=`<span class="label">もし${esc(mine)}に生まれていたら</span><p style="font-size:13px">${esc(M.hs?M.hs.name:"")}${M.univ?"→"+esc(M.univ.name)+" "+esc(M.fac):""}→${esc(M.job||"")}。${M.married?esc(M.partner)+"と結婚、":"独身、"}${M.age}歳で${esc(M.cause)}。生涯年収${yen(M.lifetime)}。</p>`}
     const sh=`【1億2380万分の1】${L.name}（${L.home}${L.district?"・"+L.district:""}生まれ）\n${L.hs?L.hs.name+"（"+L.hs.dev+"（−５））":""}${L.univ?" → "+L.univ.name+" "+L.fac+(L.univ.type==="国公立"?"（＋５）":""):""}${L.track==="理"?" 理系（＋５）":""}\n${L.job||"―"}・生涯年収${yen(L.lifetime)}・資産${yen(L.assets-L.debt)}\n${L.partner?L.partner+"と結婚":"生涯独身"}${L.kids.length?"・子"+L.kids.length+"人":""}\n${L.age}歳、${L.cause==="自殺"?"自ら命を絶った":L.cause+"で死去"}。${wk?"学歴ポイント"+wk:""}`;
     const short=`${L.home}${L.town||""}生まれ、${L.hs?L.hs.name.replace(/\(.*$/,"")+"→":""}${L.univ?L.univ.name+(L.fac?" "+L.fac:"")+"→":L.edu==="専門"?"専門学校→":""}${L.job||"無職"}。${L.partner?"結婚":"独身"}${L.kids.length?"・子"+L.kids.length+"人":""}。${L.age}歳、${L.cause==="自殺"?"自死":(L.causeDetail||L.cause)}。生涯年収${yen(L.lifetime)}${wk?"、学歴ポイント"+wk:""}。${L.flags.titles&&L.flags.titles.length?L.flags.titles[0].replace(/^\d+年 /,"")+"。":""}`;
-    const tw=`【1億2380万分の1】${L.name}の一生\n${short}\n#1億2380万分の1 #日本版人生シミュレーション`;$("#tweet").href="https://x.com/intent/post?text="+encodeURIComponent(tw);
+    const tw=`【1億2380万分の1】${L.name}の一生「${lifeTitle(L)}」（${rarity(L).text}の人生）\n${short}\n#1億2380万分の1 #日本版人生シミュレーション`;
+    try{const cv=drawCard(L);cv.style.cssText="width:100%;max-width:600px;border:1px solid var(--rule);border-radius:6px";$("#cardwrap").appendChild(cv);$("#savecard").onclick=()=>{const a=document.createElement("a");a.download=`1oku2380man_${L.name}.png`;a.href=cv.toDataURL("image/png");a.click()}}catch(e){$("#savecard").hidden=true}$("#tweet").href="https://x.com/intent/post?text="+encodeURIComponent(tw);
     $("#share").value=sh;$("#copy").onclick=()=>{navigator.clipboard.writeText(sh).then(()=>{$("#copy").textContent="コピーした"}).catch(()=>{$("#share").select()})}},50);
 }
 function sourcesHTML(){return`<section class="sheet src">
