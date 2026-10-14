@@ -1128,13 +1128,31 @@ function stepYear(L){
   if(x>=20&&x<=65&&!F.wallet&&R()<.02){F.wallet=1;return decWallet(L)}
   if(x>=15&&x<=17&&!F.cheat&&R()<.05){F.cheat=1;return decCheat(L)}
   if(x===17&&L.edu!=="中卒"&&L.edu!=="高校中退"&&!F.examCheat&&R()<.06){F.examCheat=1;return decExamCheat(L)}
-  if(F.cheatLater&&x>=19&&x<=21&&R()<.6){F.cheatLater=0;log(L,pick(["大学1年の秋、入試の不正が匿名で大学に通報された。1年間の停学になった。","大学2年の春、同じ手口で捕まった受験生の取り調べから、自分の名前が出た。大学から呼び出され、停学処分になった。"]),"red big");add(L,"j",-18);add(L,"r",-6)}
+  if(F.cheatSecret&&x>=23&&x<=50&&R()<.03){F.cheatSecret=0;F.cheatLater=0;const how=pick(["高校の同窓会で、酔った同級生が「こいつ入試でカンニングしてたんだぜ」と大声で言った。動画がSNSに上がった。","同じ年の受験生の不正事件が再調査され、通信記録から自分の名前が出た。","別れた元恋人が、入試の不正を週刊誌に売った。","自分の子どもに受験の話をしているうちに、口がすべった。子どもが学校で話し、噂が広まった。"]);log(L,`${x}歳。${how}`,"red big");
+    const r=wpick(["degree","fire","both","quiet"],[3,3,3,2]);
+    if(r==="degree"||r==="both"){log(L,`${L.univ?L.univ.name:"出身大学"}は、入学の取り消しと学位の剥奪を決めた。最終学歴は「高卒」になった。`,"red big");L.edu="高卒";add(L,"j",-12)}
+    if(r==="fire"||r==="both"){fire(L,"履歴書の学歴が虚偽にあたるとして、");if(R()<.6)sue(L,wpick([200,500,1000],[3,2,1]),"会社から、これまでの学歴手当と信用失墜の損害として")}
+    if(r==="quiet")log(L,"ネットでは3日で話題が消えた。でも、職場の空気は二度と元に戻らなかった。","red");
+    if(L.married&&R()<.3)divorce(L,"入試の不正を隠していたことが許せないと言われ、");add(L,"r",-8)}
+  if(F.sakiSecret&&x>=24&&x<=45&&R()<.04){F.sakiSecret=0;log(L,`${x}歳。高校の期末テストで答案を見ていたことが、同窓会の暴露大会で話された。全員が笑った。自分だけ笑えなかった。`,"red")}
+  if(F.studyLie&&x>=25&&x<=45&&R()<.04){F.studyLie=0;log(L,`${x}歳。高校時代の勉強垢が掘り起こされた。「1日12時間」の投稿と、同じ時間のゲームのスクショが並べて晒された。会社の後輩に「先輩ですよね？」と言われた。`,"red big");add(L,"j",-5)}
+  if(F.expenseSecret&&x>=30&&x<=60&&R()<.06){F.expenseSecret=0;const amt=F.expenseAmt||200;log(L,`${x}歳。税務調査のついでに、経費の水増しが見つかった。総額${amt}万円。`,"red big");fire(L,"業務上横領として、");sue(L,amt+Math.round(amt*.5),"会社から、返還金と遅延損害金として");if(R()<.4){log(L,"会社が刑事告訴した。執行猶予つきの有罪判決が出た。","red big")}add(L,"j",-10)}
+  if(F.resumeSecret&&x>=25&&x<=55&&R()<.05){F.resumeSecret=0;log(L,`${x}歳。履歴書に書いた「TOEIC 900点」が嘘だと、海外出張の初日にバレた。空港で通訳を探した。`,"red big");if(R()<.5)fire(L,"経歴詐称として、");else{log(L,"首はつながったが、それから海外の案件は一度も回ってこなかった。","red");add(L,"j",-6)}}
+  if(F.uraSecret&&x>=25&&x<=60&&R()<.05){F.uraSecret=0;log(L,`${x}歳。上司の悪口を書いていた裏垢が特定された。${pick(["フォロワーの中に、その上司本人がいた。","アイコンの飼い猫の写真から、同僚に特定された。","誤って本アカで投稿してしまった。"])}`,"red big");const r=R();if(r<.35){fire(L,"名誉毀損と社内規定違反で、");sue(L,wpick([50,100,300],[3,2,1]),"上司から、名誉毀損の慰謝料として")}else if(r<.7){log(L,"地方の営業所に異動になった。");add(L,"j",-8)}else{log(L,"上司は笑って「よく書けてた」と言った。それが一番怖かった。","red")}}
+  if(F.tenbaiSecret&&x>=25&&x<=60&&R()<.06){F.tenbaiSecret=0;log(L,`${x}歳。副業禁止なのに続けていた転売が、会社にバレた。${pick(["フリマアプリの出品者名が本名のままだった。","住民税の額で、人事に気づかれた。","転売していた商品が、自社の新製品だった。"])}`,"red big");if(R()<.5)fire(L,"就業規則違反として、");else{log(L,"減給6か月の処分になった。");L.assets-=40}if(R()<.3)sue(L,wpick([80,200],[2,1]),"税務署から、追徴課税として")}
+  if(F.cheatLater&&x>=19&&x<=21&&R()<.6){F.cheatLater=0;const un=L.univ?L.univ.name:"大学";log(L,pick([`大学1年の秋、入試の不正が匿名で${un}に通報された。`,`大学2年の春、同じ手口で捕まった受験生の取り調べから、自分の名前が出た。`,`酔った勢いで、サークルの飲み会で入試の話をした。翌週、${un}の学生課から呼び出しが来た。`]),"red big");
+    if(L.univ){log(L,`${un}は入学を取り消し、退学処分にした。学生証は窓口で回収された。`,"red big");L.edu="高卒";L.flags.dropUniv=L.univ;L.univ=null;L.flags.afterGrad=null;L.flags.grad=0;L.fac="";L.job="フリーター"}
+    const dmg=wpick([[120,"大学から、入学金と4年分の奨学金の返還として"],[300,"その年に不合格になった受験生から、本来合格していたはずだとして"],[80,"大学入試センターから、調査費用として"]],[3,2,2]);L.debt+=dmg[0];log(L,`${dmg[1]}${dmg[0]}万円の損害賠償を請求された。${pick(["裁判で争ったが、ほぼ全額が認められた。","親が実家を担保に借りて払った。","毎月3万円ずつ返していくことになった。"])}`,"red big");add(L,"j",-25);add(L,"r",-8)}
   if(F.cheatAfter&&x>=19&&x<=30&&R()<.25){const a=F.cheatAfter;F.cheatAfter=0;log(L,{redeem:"翌年、何も使わずに受験した。合格発表の日、自分の番号を見て、やっと前を向けた気がした。",bitter:"カンニングのことは、それからずっと誰にも話していない。就職の面接で「挫折経験は？」と聞かれ、別の話をした。",lie:"地元では「体調を崩して受けられなかった」ことになっている。母がそう言い続けている。",teach:"大人になって、塾の講師になった。毎年、受験生に「ズルだけはするな」と言う。理由は話さない。"}[a],a==="redeem"?"big":"");if(a==="redeem"||a==="teach")add(L,"j",6)}
   if(F.cheatGuilt&&x>=22&&x<=40&&R()<.08){F.cheatGuilt=0;log(L,pick(["ある日、入試のことを恋人に打ち明けた。黙って聞いたあと、「話してくれてありがとう」と言われた。","子どもの受験の年、自分の入試のことを思い出して眠れなかった。"]),"big")}
   if(x>=16&&x<=17&&L.edu!=="中卒"&&L.edu!=="高校中退"){const ex=[["exPhone",.08,decExPhone],["exLove",.08,decExLove],["exParent",.08,decExParent],["exJuku",.07,decExJuku],["exFlu",.06,decExFlu],["exSuisen",.06,decExSuisen],["exFriend",.06,decExFriend],["exTeacher",.05,decExTeacher],["exSea",.07,decExSea],["exOmamori",.05,decExOmamori],["exEnergy",.06,decExEnergy],["exAhan",.05,decExAhan],["exMuri",.06,decExMuri],["exBunka",.05,decExBunka],["exShady",.04,decExShady],["exBukatsu",.05,decExBukatsu],["exKyoki",.05,decExKyoki],["exGame",.06,decExGame],["exTwin",.04,decExTwin],["exRumor",.045,decExRumor],["exSeat",.045,decExSeat],["exLunch",.045,decExLunch],["exLibrary",.045,decExLibrary],["exJuku2",.045,decExJuku2],["exNotes",.045,decExNotes],["exSns",.045,decExSns],["exCrush",.045,decExCrush],["exGrandma",.045,decExGrandma],["exTyphoon",.045,decExTyphoon],["exPen",.045,decExPen],["exSleep",.045,decExSleep],["exOshi",.04,decExOshi],["exKanji",.04,decExKanji],["exMock",.04,decExMock],["exRamen",.04,decExRamen],["exHaircut",.04,decExHaircut],["exBike",.04,decExBike],["exLucky",.04,decExLucky],["exZoom",.04,decExZoom],["exDad",.04,decExDad],["exKotodama",.04,decExKotodama],["exYobiko",.04,decExYobiko],["exGraffiti",.04,decExGraffiti]];for(const [k,pr,fn] of ex)if(!F[k]&&R()<pr){F[k]=1;return fn(L)}
     if(x===17&&R()<.35){log(L,pick(["模試で解けなかった問題が、そっくりそのまま本番に出た。","前の晩にたまたま開いたページが、本番の英作文のテーマだった。","マークシートを1つずらして塗っていたのに、終了5分前に気づいて全部直せた。","自己採点したら、人生最高点だった。部屋で1人でガッツポーズした。","苦手だった物理で、最後の大問がまるごと解けた。帰り道、スキップしていた。","会場で隣の席の人が、中学の同級生だった。休み時間、少しだけ緊張がほぐれた。","二次試験の面接で、面接官と好きな作家が同じだった。10分間、本の話だけで終わった。","ヤマを張った単元が、3つとも出た。"]),"big");add(L,"k",3);add(L,"j",4)}
     if(x===17&&R()<.5)log(L,pick(["共通テストの朝、雪で電車が40分止まった。試験開始が繰り下げになった。","試験会場で、隣の席の人の貧乏ゆすりが2日間止まらなかった。","共通テストの数学IAで頭が真っ白になった。帰りの電車で泣いた。","自己採点の夜、家族は誰も点数を聞いてこなかった。","二次試験の前夜、ホテルの枕が合わず2時間しか眠れなかった。","合格発表の時刻、スマホを持つ手が震えて番号が打てなかった。","受験票を家に忘れ、試験本部で仮受験票をもらった。","試験会場の最寄り駅で、塾の講師が手を振って応援していた。","共通テストのリスニングで、ICプレーヤーの音が途中で途切れた。再開テストになった。","滑り止めの私大の入学金30万円を、合否が出る前に払い込んだ。","試験会場のトイレに長い列ができ、開始5分前にやっと入れた。","二次試験の会場で、高校の制服で来ているのは自分だけだった。","試験終了の合図で、隣の人がまだ書いていた。監督者に肩を叩かれていた。","前期で落ちて、後期試験の小論文を3日で詰め込んだ。","合格発表をネットで見ようとしたら、アクセス集中でつながらなかった。15分後、番号があった。","不合格の通知を見て、母が先に泣いた。","第一志望に落ちた夜、父がラーメンに連れて行ってくれた。何も聞かれなかった。","合格の報告に行くと、担任が自分以上に喜んでいた。"]),"big")}
   if(x>=24&&x<=60&&!F.guarantor&&R()<.012){F.guarantor=1;return decGuarantor(L)}
+  if(x>=25&&x<=55&&L.job&&JOBS[L.job]&&JOBS[L.job].reg&&!F.expense&&R()<.02){F.expense=1;return decExpense(L)}
+  if(x>=22&&x<=45&&!F.resume&&R()<.015){F.resume=1;return decResume(L)}
+  if(x>=22&&x<=55&&L.job&&JOBS[L.job]&&JOBS[L.job].reg&&!F.ura&&R()<.02){F.ura=1;return decUra(L)}
+  if(x>=23&&x<=55&&L.job&&JOBS[L.job]&&JOBS[L.job].reg&&!F.tenbai&&R()<.02){F.tenbai=1;return decTenbai(L)}
   if(x>=30&&x<=60&&L.job&&JOBS[L.job]&&JOBS[L.job].reg&&!F.whistle&&R()<.012){F.whistle=1;return decWhistle(L)}
   if(x>=26&&x<=50&&!F.scout&&R()<.012){F.scout=1;return decScout(L)}
   if(x>=35&&x<=70&&!F.inherit&&R()<.012){F.inherit=1;return decInherit(L)}
@@ -1416,7 +1434,7 @@ function decExLunch(L){return{moral:1,title:`昼休み、仲のいいグルー�
 function decExLibrary(L){return{moral:1,title:`市の図書館の自習室。いつも同じ席に、他校の制服の子がいる。`,text:``,opts:[{t:"話しかける",w:2,f(){if(R()<.4){log(L,"話しかけた。2人とも合格したら、お茶をしようと約束した。春、本当に行った。","big");add(L,"j",6);add(L,"r",4)}else{log(L,"話しかけた翌日から、その子は別の席に移った。","red");add(L,"j",-2)}}},{t:"何もしない",w:3,f(){log(L,"一度も話さなかった。最後の日、その子の机に「受かりますように」と書いた付箋が貼ってあった。");add(L,"k",1)}}]}}
 function decExJuku2(L){return{moral:1,title:`通っている塾の合格実績が、実は大量の「合格者の水増し」だとSNSで話題になった。`,text:``,opts:[{t:"塾を変える",w:2,f(){log(L,"冬に塾を変えた。新しい塾の先生とは、最後までなじめなかった。");add(L,"k",-1)}},{t:"そのまま通う",s:"授業はわかりやすい",w:3,f(){log(L,"そのまま通った。授業は相変わらずわかりやすかった。");add(L,"k",2)}}]}}
 function decExNotes(L){return{moral:1,title:`休んだ日のノートを、クラスの子から「貸して」と頼まれた。`,text:`自分が3年かけて作った、まとめノートだ。`,opts:[{t:"貸す",w:3,f(){if(R()<.3){log(L,"ノートはコピーされ、学年中に出回った。自分より点の高い子まで使っていた。","red");add(L,"j",-3)}else{log(L,"貸した。合格発表の日、「あのノートのおかげ」と菓子折りが届いた。");add(L,"r",4)}}},{t:"断る",w:2,f(){log(L,"断った。少し気まずくなった。");add(L,"r",-2)}}]}}
-function decExSns(L){return{moral:1,title:`勉強垢をはじめた。毎日の勉強時間を投稿している。`,text:`フォロワーが1,000人を超えた。`,opts:[{t:"続ける",w:2,f(){if(R()<.5){log(L,"投稿のための勉強になっていた。12時間と書いた日の実際は、6時間だった。","red");add(L,"k",-2)}else{log(L,"フォロワーに見られていると思うと、サボれなかった。");add(L,"k",3)}}},{t:"消す",s:"アカウントを削除する",w:2,f(){log(L,"アカウントを消した。勉強時間は、誰にも言わなくなった。");add(L,"k",2)}}]}}
+function decExSns(L){return{moral:1,title:`勉強垢をはじめた。毎日の勉強時間を投稿している。`,text:`フォロワーが1,000人を超えた。`,opts:[{t:"続ける",w:2,f(){if(R()<.5){log(L,"投稿のための勉強になっていた。12時間と書いた日の実際は、6時間だった。","red");L.flags.studyLie=1;add(L,"k",-2)}else{log(L,"フォロワーに見られていると思うと、サボれなかった。");add(L,"k",3)}}},{t:"消す",s:"アカウントを削除する",w:2,f(){log(L,"アカウントを消した。勉強時間は、誰にも言わなくなった。");add(L,"k",2)}}]}}
 function decExCrush(L){return{moral:1,title:`高3の秋。ずっと好きだった子に、受験前に告白するか迷っている。`,text:``,opts:[{t:"告白する",w:2,f(){if(R()<.35){log(L,"OKだった。受験が終わるまでは、帰り道を一緒に歩くだけにした。","big");add(L,"j",8)}else{log(L,"「今は受験に集中したい」と言われた。","red");add(L,"j",-5);add(L,"k",-2)}}},{t:"卒業式まで待つ",w:3,f(){if(R()<.4)log(L,"卒業式の日に告白した。その子は、もう別の人と付き合っていた。","red");else log(L,"卒業式の日に告白した。「なんで今なの」と笑われ、OKをもらった。","big")}}]}}
 function decExGrandma(L){return{moral:1,title:`受験の年の冬、祖母が入院した。`,text:`「顔を見せに来て」と言われている。病院は電車で2時間。`,opts:[{t:"会いに行く",w:3,f(){log(L,"週末に会いに行った。祖母は、合格祈願の手作りのお守りをくれた。");add(L,"r",3);add(L,"j",2);add(L,"k",-1)}},{t:"受験が終わってから行く",w:2,f(){if(R()<.4){log(L,"受験が終わる前に、祖母は亡くなった。最後に話したのは電話だった。","red big");add(L,"j",-8)}else log(L,"合格を報告しに行った。祖母はベッドの上で手を叩いた。")}}]}}
 function decExTyphoon(L){return{moral:1,title:`試験の前日、台風で新幹線の運休が決まった。`,text:`会場は県外だ。`,opts:[{t:"前々日に移動する",s:"今夜のうちに出る",w:3,f(){log(L,"夜行バスで向かった。会場近くのネットカフェで一晩過ごし、試験に間に合った。");add(L,"h",-2)}},{t:"当日の運行再開に賭ける",w:1,f(){if(R()<.5){log(L,"朝一番の新幹線が動いた。会場に着いたのは開始15分前だった。")}else{log(L,"新幹線は止まったままだった。振替受験の手続きをした。","red");add(L,"k",-3)}}}]}}
@@ -1441,6 +1459,8 @@ function decExJuku(L){return{moral:1,title:`塾の面談で「夏期講習フル
 function decExFlu(L){return{moral:1,title:`本命の試験の2日前、39度の熱が出た。インフルエンザだった。`,text:``,opts:[{t:"受けに行く",s:"解熱剤を飲んで会場へ",w:2,f(){if(R()<.4){log(L,"熱でぼうっとしたまま解いた。なぜか過去最高の出来だった。","big");add(L,"k",3)}else{log(L,"途中でトイレに2回立った。最後の大問は白紙だった。","red");add(L,"k",-6)}add(L,"h",-3)}},{t:"追試験を申請する",w:2,f(){log(L,"追試験を受けた。本試験より明らかに難しかった。","red");add(L,"k",-2)}}]}}
 function decExSuisen(L){return{moral:1,title:`担任から、指定校推薦の枠が1つ空いていると言われた。`,text:`偏差値は第一志望より10低い大学だ。`,opts:[{t:"推薦をもらう",s:"12月に受験を終える",w:2,f(){log(L,"指定校推薦で12月に合格が決まった。1月、教室で問題集を開く友だちの背中を見ていた。");add(L,"j",4);add(L,"k",-4);L.flags.suisen=1}},{t:"一般で挑む",s:"第一志望を目指す",w:3,f(){log(L,"推薦を断った。枠はクラスの別の子に回った。");add(L,"k",2)}}]}}
 function decExFriend(L){return{moral:1,title:`同じ志望校の親友から「一緒に自習室で勉強しよう」と誘われた。`,text:``,opts:[{t:"一緒にやる",w:3,f(){if(R()<.5){log(L,"毎日閉館まで並んで勉強した。親友は受かり、自分は落ちた。おめでとうは、少し遅れて言った。","red");add(L,"r",3)}else{log(L,"2人そろって合格した。発表の日、校門で抱き合った。","big");add(L,"j",6);add(L,"r",5)}add(L,"k",3)}},{t:"1人でやる",s:"気が散るから断る",w:2,f(){log(L,"1人で勉強した。親友とは、受験が終わってからまた話すようになった。");add(L,"k",2)}}]}}
+function fire(L,why){if(!L.job||L.job==="無職")return;log(L,`${why}${L.company?L.company+"を":""}懲戒解雇になった。`,"red big");L.job="無職";L.company="";add(L,"j",-15)}
+function sue(L,amt,who){L.debt+=amt;log(L,`${who}${amt}万円の損害賠償を請求された。${pick(["裁判になり、ほぼ全額が認められた。","和解して、毎月5万円ずつ払うことになった。","親に頭を下げて、立て替えてもらった。","自己破産も考えたが、払うことにした。"])}`,"red big")}
 function decExamCheat(L){const M=[
  {k:"phone",d:"袖の中にスマホを隠し、問題を撮ってSNSで解答を募る",caught:["試験中、袖の中で光る画面を監督者に見られた","試験の翌日、SNSに上がった問題の写真がニュースになった。投稿から自分が特定された"],police:1},
  {k:"eraser",d:"消しゴムのカバーの裏に公式と年号を書き込む",caught:["休憩中の持ち物確認で、消しゴムのカバーを外された","消しゴムを落とし、拾った監督者がカバーの裏に気づいた"]},
@@ -1452,13 +1472,13 @@ const m=pick(M);return{moral:1,title:"大学入試まであと3か月。模試�
    if(R()<.8){log(L,`共通テスト本番。${pick(m.caught)}。`,"red big");L.flags.examBan=1;L.flags.cheatCaught=1;add(L,"r",-6);
     const end=wpick(["void","police","news","parent","school","friend"],[5,m.police?4:0,m.police?2:1,3,3,m.k==="ear"?3:0]);
     ({void:()=>{log(L,"不正行為と認定され、その年の全科目の成績が無効になった。試験場の外で、親が待っていた。","red big");add(L,"j",-15)},
-      police:()=>{log(L,"大学入試センターが被害届を出し、偽計業務妨害の疑いで警察から事情を聴かれた。家庭裁判所に送られ、保護観察になった。","red big");L.flags.cheatPolice=1;add(L,"j",-22);add(L,"r",-6)},
+      police:()=>{log(L,"大学入試センターが被害届を出し、偽計業務妨害の疑いで警察から事情を聴かれた。家庭裁判所に送られ、保護観察になった。","red big");if(R()<.5){L.debt+=60;log(L,"再試験の実施費用として、60万円の損害賠償も請求された。","red")}L.flags.cheatPolice=1;add(L,"j",-22);add(L,"r",-6)},
       news:()=>{log(L,"「受験生がカンニング」と全国ニュースで流れた。名前は出なかったが、同じ高校の全員が自分だと知っていた。","red big");add(L,"j",-20);add(L,"r",-8)},
       parent:()=>{log(L,"迎えに来た父は、車の中で一言もしゃべらなかった。家に着くと、母が台所で泣いていた。","red big");add(L,"j",-15);add(L,"r",-4)},
       school:()=>{log(L,"高校に連絡が入り、卒業式は別室で1人で卒業証書を受け取った。","red big");add(L,"j",-16)},
       friend:()=>{log(L,"読み上げ役の友人も呼び出された。友人の推薦合格は取り消され、それきり連絡は来なくなった。","red big");add(L,"j",-18);add(L,"r",-8)}})[end]();
     L.flags.cheatAfter=wpick(["redeem","bitter","lie","teach"],[4,3,2,1])}
-   else{const end=wpick(["pass","fail","same","guilt","blackmail","later"],[4,2,2,3,1,1]);L.flags.cheatPassed=1;
+   else{const end=wpick(["pass","fail","same","guilt","blackmail","later"],[4,2,2,3,1,1]);L.flags.cheatPassed=1;L.flags.cheatSecret=1;
     ({pass:()=>{log(L,"バレなかった。点数は20点上がった。合格通知を見ても、喜び方がわからなかった。");add(L,"k",5);add(L,"j",-2)},
       fail:()=>{log(L,"バレなかった。それでも第一志望には落ちた。危ない橋を渡った意味は、なかった。","red");add(L,"j",-4)},
       same:()=>{log(L,"バレなかった。でも、見た答えは全部まちがっていた。自力で解いた問題だけが当たっていた。");add(L,"j",-1)},
@@ -1467,8 +1487,12 @@ const m=pick(M);return{moral:1,title:"大学入試まであと3か月。模試�
       later:()=>{log(L,"その場ではバレなかった。");L.flags.cheatLater=1;add(L,"k",4)}})[end]()}}},
   {t:"やらない",s:"残り3か月、自力でやる",w:4,f(){log(L,pick(["画面を閉じて、過去問を1年分解いた。","画面を閉じた。その手口で捕まった受験生のニュースを、翌年の1月に見た。","画面を閉じて、苦手な単元をノートに書き出した。"]));add(L,"k",3)}}]}}
 function decCheat(L){const v=pick(["佐藤","高橋","伊藤","中村","小林"]);return{moral:1,title:`期末テスト前日、${v}から「答案、手に入った」とLINEが来た。`,text:"",opts:[
-  {t:"見る",s:"答えを写真で受け取る",w:2,f(){if(R()<.35){log(L,`答案の流出がバレて、${v}と一緒に職員室に呼ばれた。親が学校に来た。`,"red");add(L,"j",-6);add(L,"k",-3)}else{log(L,"その教科だけ学年10位になった。誰にも言っていない。");add(L,"j",-1)}}},
+  {t:"見る",s:"答えを写真で受け取る",w:2,f(){if(R()<.35){log(L,`答案の流出がバレて、${v}と一緒に職員室に呼ばれた。親が学校に来た。`,"red");add(L,"j",-6);add(L,"k",-3)}else{log(L,"その教科だけ学年10位になった。誰にも言っていない。");L.flags.sakiSecret=1;add(L,"j",-1)}}},
   {t:"見ない",s:"既読だけつけて閉じる",w:3,f(){log(L,`見なかった。翌週、${v}たち5人が停学になった。`);add(L,"j",2)}}]}}
+function decExpense(L){return{moral:1,title:`経理の先輩に教わった。「タクシー代は、ちょっと多めに書いても誰も見てないよ」`,text:``,opts:[{t:"水増しする",s:"月に数万円だけ",w:2,f(){log(L,"毎月少しずつ、経費を多めに申請するようになった。誰にも気づかれなかった。");L.assets+=30;L.flags.expenseSecret=1;L.flags.expenseAmt=pick([150,300,600])}},{t:"やらない",w:3,f(){log(L,"やらなかった。5年後、その先輩が懲戒解雇になった。");add(L,"j",2)}}]}}
+function decResume(L){return{moral:1,title:`転職の履歴書。TOEICは550点だ。`,text:`「900点」と書けば、書類は確実に通る。`,opts:[{t:"900点と書く",w:2,f(){log(L,"900点と書いた。書類も面接も通った。英語の質問は、なぜか一度も来なかった。");L.flags.resumeSecret=1;add(L,"j",3)}},{t:"正直に書く",w:3,f(){log(L,"550点と書いた。面接で「伸びしろですね」と言われた。")}}]}}
+function decUra(L){return{moral:1,title:`上司に理不尽に怒鳴られた夜。スマホで裏垢を作った。`,text:``,opts:[{t:"悪口を書きまくる",w:2,f(){log(L,"裏垢で上司の悪口を書き続けた。フォロワーが3,000人を超え、「あるある」と共感された。");L.flags.uraSecret=1;add(L,"j",4)}},{t:"アカウントを消す",w:3,f(){log(L,"書く前に消した。代わりに、ジムに行った。");add(L,"h",2)}}]}}
+function decTenbai(L){return{moral:1,title:`会社は副業禁止。でも、限定スニーカーを転売すれば月10万円になると聞いた。`,text:``,opts:[{t:"こっそりやる",w:2,f(){log(L,"転売を始めた。1年で、給料とは別に100万円以上稼いだ。");L.assets+=100;L.flags.tenbaiSecret=1}},{t:"やめておく",w:3,f(){log(L,"やめておいた。")}}]}}
 function decGuarantor(L){const v=pick(["大学の同期の","地元の幼なじみの","元同僚の","いとこの"])+pick(["健太","翔","美咲","大輔","彩"]);const amt=pick([300,500,800]);return{moral:1,title:`${v}に、${amt}万円の借金の連帯保証人を頼まれた。`,text:"「迷惑はかけない。判子だけでいい」",opts:[
   {t:"引き受ける",s:"判子を押す",w:2,f(){if(R()<.45){log(L,`2年後、${v}と連絡が取れなくなった。${amt}万円の請求書が自分に届いた。`,"red big");L.debt+=amt;add(L,"j",-10)}else{log(L,`${v}は5年かけて完済した。完済の日、焼肉をおごってくれた。`);add(L,"r",5)}}},
   {t:"断る",s:"「ごめん、それはできない」",w:3,f(){log(L,`断った。${v}とはそれきり疎遠になった。`);add(L,"r",-3)}}]}}
