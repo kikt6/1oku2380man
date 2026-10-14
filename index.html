@@ -1271,7 +1271,7 @@ function birth(prev,fp,by){
   $("#start").onclick=()=>{const v=$("#nm").value.trim();if(v)L.name=v;let want="1";try{want=localStorage.getItem("68man_bgm")??"1"}catch(e){}if(want==="1")BGM.start();track("life-start","人生を始めた");if(nick())track("player/"+nick(),nick());play()};$("#back").onclick=home;
 }
 
-function play(){S.view="play";const L=S.L;
+function play(){S.shown=0;clearTimeout(S.revT);S.view="play";const L=S.L;
   app.innerHTML=`
   <div class="top">
     <div class="topline"><span class="age num" id="age">0<small>歳</small></span><span class="who">${furi(L.name)}</span><span class="muted" id="where">${L.home}</span><span class="muted" id="jobline"></span></div>
@@ -1304,7 +1304,7 @@ function year(){
   const L=S.L;if(S.pause||S.dec||S.breath||!L.alive)return;
   const d=stepYearAll(L);
   if(d){const ask=!S.auto&&!d.auto&&(d.moral||S.paths);if(!ask)autoResolve(L,d);else{S.dec=d;showDec(d)}}
-  render();const last=L.events.slice(-3);BGM.mood=last.some(e=>/red/.test(e.cls))?-1:(L.st.j>55?1:0);
+  if(S.dec||!L.alive)revealAll();render();if(!S.dec&&L.alive)revealNew();const last=L.events.slice(-3);BGM.mood=last.some(e=>/red/.test(e.cls))?-1:(L.st.j>55?1:0);
   if(!L.alive){clearInterval(S.timer);BGM.mood=-1;setTimeout(()=>{BGM.stop();ending()},1400);return}
   if(BREATH[L.age]&&!S.auto&&!S.dec){S.breath=1;showBreath(L.age)}
   if(!S.dec)L.age++;
@@ -1312,7 +1312,7 @@ function year(){
 function showDec(d){const L=S.L;
   $("#dec").innerHTML=`<div class="decision"><span class="label">決断　${L.age}歳</span><h3>${esc(d.title)}</h3>${d.text?`<p class="muted">${esc(d.text)}</p>`:""}
     <div class="choices">${d.opts.map((o,i)=>`<button class="choice" data-i="${i}">${esc(o.t)}${o.s?`<small>${esc(o.s)}</small>`:""}</button>`).join("")}</div></div>`;
-  document.querySelectorAll(".choice").forEach(b=>b.onclick=()=>{const nd=d.opts[+b.dataset.i].f();if(nd){S.dec=nd;showDec(nd);render();return}S.dec=null;$("#dec").innerHTML="";S.L.age++;render()});
+  document.querySelectorAll(".choice").forEach(b=>b.onclick=()=>{const nd=d.opts[+b.dataset.i].f();if(nd){S.dec=nd;showDec(nd);revealAll();render();return}S.dec=null;$("#dec").innerHTML="";revealAll();S.L.age++;render()});
   $("#dec").scrollIntoView({block:"nearest"});
 }
 function showBreath(a){
@@ -1322,11 +1322,14 @@ function showBreath(a){
   $("#bn").onclick=()=>{const v=$("#bt").value.trim();if(v){S.L.notes.push({a,t:v});S.L.events.push({a,t:"「"+v+"」",cls:"note"})}S.breath=null;$("#dec").innerHTML="";render()};
 }
 function jobLine(L){const a=L.age;if(a<15)return"";if(L.hs&&a<18)return L.hs.name;if(L.univ&&a<L.univGrad)return`${L.univ.name} ${L.fac}`;if(L.prison)return"服役中";if(L.job)return`${L.job}${L.company?"・"+L.company:""}`;return""}
+function renderLog(){const L=S.L;if(!$("#log"))return;const evs=L.events.filter(e=>e.t);if(S.shown==null||S.shown>evs.length)S.shown=evs.length;$("#log").innerHTML=evs.slice(0,S.shown).slice().reverse().map(e=>`<div class="ev ${e.cls}"><span class="a">${e.a}歳</span><p>${esc(e.t)}</p></div>`).join("")}
+function revealAll(){const L=S.L;S.shown=L.events.filter(e=>e.t).length;clearTimeout(S.revT)}
+function revealNew(){const L=S.L;const total=L.events.filter(e=>e.t).length;if(S.shown==null)S.shown=total;const n=total-S.shown;if(n<=0)return;clearTimeout(S.revT);const gap=Math.max(180,Math.min(1600,S.speed*1000/(n+1)));const step=()=>{if(!S.L||S.L!==L)return;if(S.shown<total){S.shown++;renderLog();if(S.shown<total)S.revT=setTimeout(step,gap)}};S.revT=setTimeout(step,Math.min(gap,400))}
 function render(){const L=S.L;if(!$("#age"))return;
   $("#age").innerHTML=`${L.age}<small>歳</small><small style="margin-left:8px;color:var(--sub)">${L.birthYear+L.age}年</small>`;$("#where").textContent=L.where===L.home?L.home+L.city:`${L.home}${L.city}生まれ・${L.where}暮らし`;$("#jobline").textContent=jobLine(L);
   $("#stats").innerHTML=[["h","健康"],["j","幸福"],["k","知識"],["r","人間関係"]].map(([k,n])=>`<div class="stat"><span>${n}<b class="num">${Math.round(L.st[k])}</b></span><div class="bar"><i style="width:${L.st[k]}%"></i></div></div>`).join("")
     +`<div class="stat money"><span>年収</span><b class="num">${L.age>=18?yen(L.income):"―"}</b></div><div class="stat money"><span>資産</span><b class="num" style="color:${(L.assets-L.debt)<0?"var(--shu)":"inherit"}">${L.age>=18?(L.assets-L.debt<0?"−":"")+yen(Math.abs(L.assets-L.debt)):"―"}</b></div>`;
-  $("#log").innerHTML=L.events.filter(e=>e.t).slice().reverse().map(e=>`<div class="ev ${e.cls}"><span class="a">${e.a}歳</span><p>${esc(e.t)}</p></div>`).join("");
+  renderLog();
   $("#oth").innerHTML=S.others.map(o=>{const h=o.hist[Math.min(L.age,o.hist.length-1)],dead=L.age>=o.hist.length-1&&!o.L.alive;
     return`<div class="other ${dead?"dead":""}"><b>${o.L.name}</b><span class="muted">${o.L.home}</span><span class="s">${esc(h)}</span></div>`}).join("");
   document.querySelectorAll("#map i").forEach((c,i)=>{if(i<=L.age&&i<100){c.classList.add("c");c.style.background=i===L.age&&!L.alive?"var(--shu)":i<18?"var(--moss)":L.retired&&i>=65?"var(--sub)":"var(--ai)"}});
