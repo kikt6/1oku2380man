@@ -1126,6 +1126,14 @@ function stepYear(L){
   if(F.poor&&x===16&&R()<.5){log(L,"家計を助けるため、放課後は毎日バイトに入った。");add(L,"k",-5)}
   if(x>=9&&x<=14&&!F.sawBully&&R()<.07){F.sawBully=1;return decSeeBully(L)}
   if(x>=20&&x<=65&&!F.wallet&&R()<.02){F.wallet=1;return decWallet(L)}
+  if(x>=15&&x<=17&&!F.cheat&&R()<.05){F.cheat=1;return decCheat(L)}
+  if(x>=24&&x<=60&&!F.guarantor&&R()<.012){F.guarantor=1;return decGuarantor(L)}
+  if(x>=30&&x<=60&&L.job&&JOBS[L.job]&&JOBS[L.job].reg&&!F.whistle&&R()<.012){F.whistle=1;return decWhistle(L)}
+  if(x>=26&&x<=50&&!F.scout&&R()<.012){F.scout=1;return decScout(L)}
+  if(x>=35&&x<=70&&!F.inherit&&R()<.012){F.inherit=1;return decInherit(L)}
+  if(x>=20&&x<=45&&!F.reunion&&R()<.015){F.reunion=1;return decReunion(L)}
+  if(x>=40&&x<=75&&!F.stray&&R()<.012){F.stray=1;return decStray(L)}
+  if(x>=18&&x<=30&&!F.dream&&R()<.012){F.dream=1;return decDream(L)}
   if(x>=20&&x<=70&&!F.rescue&&R()<.015){F.rescue=1;return decRescue(L)}
   if(x>=28&&x<=55&&L.job&&JOBS[L.job].reg&&!F.fraud&&R()<.02){F.fraud=1;return decFraud(L)}
   if(x>=20&&x<=35&&!F.multi&&R()<.03){F.multi=1;return decMulti(L)}
@@ -1382,6 +1390,30 @@ function decGamble(L){const g=pick(["パチンコ","競馬","オンラインカ�
 function decSeeBully(L){const v=person(L.sex).split(" ")[1];return{moral:1,title:`クラスの${v}がいじめられている。`,text:"自分は標的ではない。",opts:[
   {t:"助ける",s:"次の標的になるかもしれない",w:1,f(){if(R()<.5){log(L,`${v}をかばった。それ以来、${v}とは親友になった。`);add(L,"r",8);add(L,"j",5)}else{log(L,`${v}をかばったら、今度は自分が標的になった。`,"red");L.flags.bully=1;add(L,"j",-10)}}},
   {t:"助けない",s:"見て見ぬふりをする",w:2,f(){log(L,`見て見ぬふりをした。${v}は転校した。大人になっても、ときどき思い出す。`,"red");add(L,"j",-4)}}]}}
+function decCheat(L){const v=pick(["佐藤","高橋","伊藤","中村","小林"]);return{moral:1,title:`期末テスト前日、${v}から「答案、手に入った」とLINEが来た。`,text:"",opts:[
+  {t:"見る",s:"答えを写真で受け取る",w:2,f(){if(R()<.35){log(L,`答案の流出がバレて、${v}と一緒に職員室に呼ばれた。親が学校に来た。`,"red");add(L,"j",-6);add(L,"k",-3)}else{log(L,"その教科だけ学年10位になった。誰にも言っていない。");add(L,"j",-1)}}},
+  {t:"見ない",s:"既読だけつけて閉じる",w:3,f(){log(L,`見なかった。翌週、${v}たち5人が停学になった。`);add(L,"j",2)}}]}}
+function decGuarantor(L){const v=pick(["大学の同期の","地元の幼なじみの","元同僚の","いとこの"])+pick(["健太","翔","美咲","大輔","彩"]);const amt=pick([300,500,800]);return{moral:1,title:`${v}に、${amt}万円の借金の連帯保証人を頼まれた。`,text:"「迷惑はかけない。判子だけでいい」",opts:[
+  {t:"引き受ける",s:"判子を押す",w:2,f(){if(R()<.45){log(L,`2年後、${v}と連絡が取れなくなった。${amt}万円の請求書が自分に届いた。`,"red big");L.debt+=amt;add(L,"j",-10)}else{log(L,`${v}は5年かけて完済した。完済の日、焼肉をおごってくれた。`);add(L,"r",5)}}},
+  {t:"断る",s:"「ごめん、それはできない」",w:3,f(){log(L,`断った。${v}とはそれきり疎遠になった。`);add(L,"r",-3)}}]}}
+function decWhistle(L){return{moral:1,title:"会社が検査データを書き換えているのを知ってしまった。",text:"上司は「どこもやってる」と言った。",opts:[
+  {t:"通報する",s:"公益通報窓口に報告する",w:2,f(){if(R()<.5){log(L,"通報から半年後、不正が報道された。社長が会見で頭を下げた。自分は地方の倉庫に異動になった。","red big");add(L,"j",-4)}else{log(L,"不正は是正された。後輩から「あれ、先輩ですよね」と小声で言われた。");add(L,"j",5)}}},
+  {t:"黙っている",s:"見なかったことにする",w:2,f(){if(R()<.3){log(L,"3年後に不正が発覚した。関わった全員が処分され、自分も減給になった。","red");L.assets-=50;add(L,"j",-6)}else log(L,"黙っていた。その部署の飲み会には、行かなくなった。")}}]}}
+function decScout(L){const co=pick(["外資系コンサル","ITベンチャー","競合の大手","シンガポールの会社"]);return{moral:1,title:`ヘッドハンターから電話。${co}が年収1.5倍で来てほしいと言っている。`,text:"",opts:[
+  {t:"転職する",w:2,f(){if(R()<.6){log(L,`${co}に転職した。年収は上がったが、半年で白髪が増えた。`);L.flags.scoutUp=1;L.assets+=200;add(L,"h",-4)}else{log(L,`${co}に転職したが、1年で部署ごとなくなった。`,"red");add(L,"j",-6)}}},
+  {t:"今の会社に残る",w:3,f(){log(L,"断った。その年の冬、少しだけ昇給した。");add(L,"j",1)}}]}}
+function decInherit(L){const amt=pick([800,1500,3000]);return{moral:1,title:`父方の叔父が亡くなった。${amt}万円の遺産をめぐって、親戚が揉めている。`,text:"",opts:[
+  {t:"法定どおり受け取る",s:"弁護士を立てる",w:2,f(){log(L,`${Math.round(amt/4)}万円を受け取った。それ以来、法事に呼ばれなくなった。`);L.assets+=Math.round(amt/4);add(L,"r",-4)}},
+  {t:"放棄する",s:"「自分はいらない」と言う",w:2,f(){log(L,"相続を放棄した。叔母から、毎年みかんが届くようになった。");add(L,"r",4);add(L,"j",2)}}]}}
+function decReunion(L){const v=pick(["中学で好きだった","高校の部活の","初恋の"])+pick(["あの子","先輩","同級生"]);return{moral:1,title:`同窓会の案内が届いた。${v}も来るらしい。`,text:"",opts:[
+  {t:"行く",w:3,f(){const r=R();if(r<.3&&!L.married){log(L,`${v}と連絡先を交換した。2回目は、2人で会った。`);add(L,"j",6);add(L,"r",4)}else if(r<.6)log(L,`${v}は来なかった。代わりに、昔いじめてきた奴に謝られた。`);else{log(L,`${v}は結婚して3人の子持ちになっていた。写真を見せてもらった。`)}}},
+  {t:"行かない",w:2,f(){log(L,"行かなかった。後でグループLINEに上がった集合写真を、何度も拡大した。")}}]}}
+function decStray(L){return{moral:1,title:"雨の夜、家の前に子猫が捨てられていた。",text:"",opts:[
+  {t:"飼う",w:3,f(){const n=pick(["ミケ","タマ","こむぎ","ソラ","ちゃちゃ"]);log(L,`「${n}」と名づけて飼った。${n}は${14+Math.floor(R()*6)}年生きた。`);L.flags.pet=n;add(L,"j",7);L.assets-=30}},
+  {t:"保護団体に連絡する",w:2,f(){log(L,"保護団体に引き取ってもらった。1か月後、里親が見つかったと写真が届いた。");add(L,"j",2)}}]}}
+function decDream(L){const d=pick(["バンド","漫画","お笑い","小説","映画"]);return{moral:1,title:`ずっと続けてきた${d}で、「本気でやらないか」と誘われた。`,text:"親は「いつまでやるの」と言っている。",opts:[
+  {t:"本気でやる",s:"3年だけ賭ける",w:2,f(){if(R()<.08){log(L,`${d}が当たった。SNSで一晩に10万人に広まった。`,"big");L.assets+=500;add(L,"j",10)}else{log(L,`3年やって、芽が出なかった。${d}は今も趣味で続けている。`);add(L,"j",2);L.assets-=100}}},
+  {t:"諦める",s:"普通に就職する",w:3,f(){log(L,`${d}をやめた。押し入れの奥に、まだ道具がある。`);add(L,"j",-3)}}]}}
 function decWallet(L){const amt=3+Math.floor(R()*20);return{moral:1,title:`道で財布を拾った。現金${amt}万円と免許証。`,text:"",opts:[
   {t:"交番に届ける",w:3,f(){log(L,`交番に届けた。${R()<.5?"3か月後、持ち主からお礼の菓子折りが届いた。":"お礼はなかった。"}`);add(L,"j",3)}},
   {t:"現金だけ抜いて捨てる",w:1,f(){if(R()<.15){log(L,"防犯カメラに映っていて、占有離脱物横領で書類送検された。会社に知られた。","red");add(L,"j",-10);add(L,"r",-8)}else{log(L,`${amt}万円を自分のものにした。`,"red");L.assets+=amt;add(L,"j",-2)}}}]}}
