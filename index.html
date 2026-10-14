@@ -2121,7 +2121,7 @@ function home(){
     <div><button class="btn" id="go">生まれる</button></div>
     <details class="more" ${S.challenge?"open":""}><summary>チャレンジ・ニックネーム・生まれる県や年を選ぶ</summary><div class="setup" style="margin-top:12px">
     <div class="row"><span class="label">チャレンジ（任意）</span><p class="muted" style="font-size:12px;margin:0 0 4px">目標を決めて生まれる。出生や確率は変わりません。達成はこの端末に記録されます。</p>
-      <div class="chal" id="chal">${(()=>{const A=loadAch();const nn=A.normal||0;if(nn<5)return `<p class="muted" style="grid-column:1/-1;font-size:13px;margin:0">🔒 「${MODES.slow.label}」で5回生きると選べるようになります（あと${5-nn}回）</p>`;return CHALLENGES.map(c=>`<button class="chalc ${S.challenge===c.id?"on":""} ${A.cleared&&A.cleared[c.id]?"done":""}" data-c="${c.id}"><b>${c.name}</b><span class="d">${"★".repeat(c.diff)}${"☆".repeat(4-c.diff)}</span><small>${c.desc}</small></button>`).join("")})()}</div></div>
+      <div class="chal" id="chal">${(()=>{const A=loadAch();const nn=A.normal||0;if(nn<3)return `<p class="muted" style="grid-column:1/-1;font-size:13px;margin:0">🔒 「${MODES.slow.label}」で3回生きると選べるようになります（あと${3-nn}回）</p>`;return CHALLENGES.map(c=>`<button class="chalc ${S.challenge===c.id?"on":""} ${A.cleared&&A.cleared[c.id]?"done":""}" data-c="${c.id}"><b>${c.name}</b><span class="d">${"★".repeat(c.diff)}${"☆".repeat(4-c.diff)}</span><small>${c.desc}</small></button>`).join("")})()}</div></div>
     <div class="row"><span class="label">ニックネーム（任意。最期の記録とXの投稿に「プレイヤー：○○」と入ります）</span>
       <input type="text" id="nick" maxlength="20" placeholder="ニックネーム" value="${esc(nick())}" style="font-size:15px;max-width:260px"></div>
     <div class="row"><span class="label">生まれる都道府県（任意。選ばなければ出生数に応じてランダム。市区町村はこちらで決めます）</span>
