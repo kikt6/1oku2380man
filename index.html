@@ -1058,7 +1058,9 @@ function rarity(L){
 const GC="https://1oku2380man.goatcounter.com";
 function track(path,title){try{if(window.goatcounter&&goatcounter.count)goatcounter.count({path,title,event:true})}catch(e){}}
 function showPlays(){try{if(!window.goatcounter)return;fetch(GC+"/counter/life-start.json").then(r=>r.json()).then(d=>{const el=$("#plays");if(el&&d&&d.count){el.hidden=false;el.innerHTML=`これまでに <b class="num">${String(d.count).replace(/[^\d]/g,"")}</b> 人がここで生まれました`}}).catch(()=>{})}catch(e){}}
-const FORM_URL="";// レビュー用Googleフォーム（未設定なら非表示）
+const REVIEW_API="";// みんなのレビュー（Apps ScriptのウェブアプリURL。未設定なら非表示）
+async function loadReviews(el){if(!REVIEW_API||!el)return;try{const r=await fetch(REVIEW_API,{cache:"no-store"});const d=await r.json();const rv=d.reviews||[];el.innerHTML=`<span class="label">みんなのレビュー（${d.total||0}件）</span>`+(rv.length?`<div class="mem" style="margin-top:6px">${rv.map(x=>`<div style="display:block"><p style="margin:0;font-size:14px">${esc(x.t)}</p><span class="muted" style="font-size:11px">${esc(x.n)}　${x.p?esc(x.p)+(x.ti?"「"+esc(x.ti)+"」":"")+(x.a!==""?x.a+"歳":"")+(x.c?"・"+esc(x.c):"")+"　":""}${esc(x.d)}</span></div>`).join("")}</div>`:`<p class="muted" style="font-size:13px">まだありません。最初のレビューを書いてください。</p>`)}catch(e){el.innerHTML=""}}
+async function postReview(body){const r=await fetch(REVIEW_API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(body)});return r.json()}
 const nick=()=>{try{return (localStorage.getItem("68man_nick")||"").trim().slice(0,20)}catch(e){return ""}};
 // ===== 状態 =====
 let S={view:"home",speed:4,L:null,others:[],timer:null,dec:null,pause:false,auto:false,breath:null,paths:false};
@@ -1115,6 +1117,7 @@ function home(){
     <p class="warn">乳児の死亡、いじめ、事故、病気、離婚、暴力団、夜の仕事、自殺のような重い出来事も、実際の統計どおりの確率で起こります。自殺の方法や理由は描きません。18歳以上向け。</p>
   </section>
   ${mem.length?`<section class="sheet"><h3 style="font-size:18px">前世の記録</h3><div class="mem" style="margin-top:8px">${mem.map(m=>`<div><span>${esc(m.name)}（${esc(m.pref)}・${esc(m.job||"")}）</span><span class="num muted">${m.age}歳・${esc(m.cause)}</span></div>`).join("")}</div></section>`:""}
+  ${REVIEW_API?`<section class="sheet" id="reviews"></section>`:""}
   ${sourcesHTML()}`;
   const t0=Date.now();clearInterval(S.cnt);
   const BI=31536000/686173,DI=31536000/1605378;
@@ -1122,7 +1125,7 @@ function home(){
     cb.textContent=Math.floor(s/BI);cd.textContent=Math.floor(s/DI);$("#cbn").textContent=`次の赤ちゃんまで ${Math.ceil(BI-s%BI)}秒（46秒に1人）`;$("#cdn").textContent=`次まで ${Math.ceil(DI-s%DI)}秒（20秒に1人）`},250);
   document.querySelectorAll("#spd .chip").forEach(b=>b.onclick=()=>{S.speed=+b.dataset.v;home()});
   $("#mine").onchange=e=>{try{localStorage.setItem("68man_mine",e.target.value)}catch(_){}};
-  $("#go").onclick=()=>{try{localStorage.setItem("68man_nick",$("#nick").value.trim().slice(0,20))}catch(e){}birth(null,$("#bornpref").value||null,+$("#byear").value)};showPlays();
+  loadReviews($("#reviews"));$("#go").onclick=()=>{try{localStorage.setItem("68man_nick",$("#nick").value.trim().slice(0,20))}catch(e){}birth(null,$("#bornpref").value||null,+$("#byear").value)};showPlays();
 }
 function myPref(){try{return localStorage.getItem("68man_mine")||""}catch(e){return""}}
 
@@ -1274,14 +1277,15 @@ function ending(){
     ${L.notes.length?`<div><span class="label">残した言葉</span>${L.notes.map(n=>`<p style="font-family:var(--display);margin-top:6px">${n.a}歳「${esc(n.t)}」</p>`).join("")}</div>`:""}
     <div><span class="label">同じ1秒に生まれた4人の最期</span><div class="mem" style="margin-top:6px">${others}</div></div>
     ${L.cause==="自殺"?`<p class="help">つらい気持ちを抱えているときは、相談できる窓口があります。よりそいホットライン 0120-279-338（24時間）、#いのちSOS 0120-061-338。</p>`:""}
-    <div class="row"><label class="label" for="lw">この人にひとこと</label><input type="text" id="lw" placeholder="おつかれさま"></div>
+    ${REVIEW_API?`<div class="row"><label class="label" for="lw">この人生にひとこと（みんなに公開されます）</label><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input type="text" id="lwn" maxlength="20" placeholder="ニックネーム" value="${esc(nick())}" style="max-width:140px"><input type="text" id="lw" maxlength="300" placeholder="おつかれさま／このゲームの感想など" style="flex:1;min-width:200px"><button class="btn ghost" id="lwpost">投稿する</button></div><p class="muted" id="lwmsg" style="font-size:12px;margin:4px 0 0"></p></div>`:`<div class="row"><label class="label" for="lw">この人にひとこと</label><input type="text" id="lw" placeholder="おつかれさま"></div>`}
     <div class="facts" id="report"></div>
     <div id="mine-life"></div>
     <div class="row"><span class="label">この人生を共有する</span><textarea id="share" rows="4" readonly></textarea><div id="cardwrap" style="margin:8px 0"></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="savecard">画像を保存</button><a class="btn" id="tweet" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">Xに投稿する</a><button class="btn ghost" id="copy">コピー</button>${FORM_URL?`<a class="btn ghost" href="${FORM_URL}" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">レビューを書く</a>`:""}</div></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="again">もう一度生まれる</button>${L.kids.some(k=>!k.dead)?`<button class="btn" id="rebirth">この人の子として生まれ直す</button>`:""}<button class="btn ghost" id="tohome">はじめに戻る</button></div>
   </section>
   <section class="sheet"><span class="label">人生の記録</span><div class="log" style="max-height:none">${L.events.filter(e=>e.t).map(e=>`<div class="ev ${e.cls}"><span class="a">${e.a}歳</span><p>${esc(e.t)}</p></div>`).join("")}</div></section>`;
-  $("#again").onclick=()=>birth();$("#tohome").onclick=home;if($("#rebirth"))$("#rebirth").onclick=()=>birth(L);window.scrollTo({top:0});
+  $("#again").onclick=()=>birth();$("#tohome").onclick=home;
+  if($("#lwpost"))$("#lwpost").onclick=async()=>{const t=$("#lw").value.trim();if(t.length<2){$("#lwmsg").textContent="2文字以上で書いてください";return}$("#lwpost").disabled=true;$("#lwmsg").textContent="送信中…";try{const n=$("#lwn").value.trim().slice(0,20);try{localStorage.setItem("68man_nick",n)}catch(e){}const d=await postReview({n,t,p:L.name,ti:lifeTitle(L),a:L.age,c:L.cause==="自殺"?"自死":(L.cause||"")});if(d.ok){$("#lwmsg").textContent="投稿しました。トップページの「みんなのレビュー」に載ります。";$("#lw").value="";track("review","レビュー投稿")}else{$("#lwmsg").textContent="送れませんでした："+(d.err||"");$("#lwpost").disabled=false}}catch(e){$("#lwmsg").textContent="送れませんでした（通信エラー）";$("#lwpost").disabled=false}};if($("#rebirth"))$("#rebirth").onclick=()=>birth(L);window.scrollTo({top:0});
     // 通知表：同じ条件で生まれた200人と比べる
   setTimeout(()=>{const N=200,arr=[];for(let i=0;i<N;i++){const o=shadowLife().L;arr.push(o)}const pct=(v,f)=>Math.round(arr.filter(o=>f(o)<v).length/N*100);
     const items=[["寿命",pct(L.age,o=>o.age)],["生涯年収",pct(L.lifetime,o=>o.lifetime)],["遺した資産",pct(L.assets-L.debt,o=>o.assets-o.debt)],["幸福",pct(L.st.j,o=>o.st.j)]];
