@@ -817,14 +817,14 @@ function decHS(L){const d=devOf(L),G=GAKKU[L.p.n];let all=HS[L.p.n]||[];const is
   o.push({t:`${fit[0]}を受ける`,s:`偏差値${fit[1]}・実力相応。見込み85%`,w:50,f(){if(R()<.85)go(fit);else{log(L,`${fit[0]}に落ちた。`,"red");go(priv===fit?(safe||fit):priv,isPriv((priv===fit?(safe||fit):priv)[0])?"滑り止めの私立、":"滑り止めの")}}});
   if(safe&&safe!==fit)o.push({t:`${safe[0]}を受ける`,s:`偏差値${safe[1]}・安全校`,w:15,f(){go(safe)}});
   if(voc&&voc!==fit&&voc!==safe)o.push({t:`${voc[0]}へ`,s:`偏差値${voc[1]}・手に職をつける`,w:15,f(){go(voc)}});
-  return{auto:1,title:"高校受験。",text:`いまの学力は偏差値${d}くらい。${G?`${L.home}は${G.districts.length}学区制。${L.town}（${L.district}）に住んでいるので、${out.length?out.slice(0,3).join("・")+"は学区外で受けられない。":"学区内の高校から選ぶ。"}`:L.home+"の高校から選ぶ。"}`,opts:o}}
+  return{title:"高校受験。",text:`いまの学力は偏差値${d}くらい。${G?`${L.home}は${G.districts.length}学区制。${L.town}（${L.district}）に住んでいるので、${out.length?out.slice(0,3).join("・")+"は学区外で受けられない。":"学区内の高校から選ぶ。"}`:L.home+"の高校から選ぶ。"}`,opts:o}}
 function decJuken(L){const d=devOf(L)+4,all=HS[L.p.n]||[];const reg=region(L.p.n);const juku=pick(reg==="関東"?["SAPIX","日能研","四谷大塚","早稲田アカデミー"]:reg==="近畿"?["浜学園","希学園","馬渕教室","日能研"]:reg==="九州"?["英進館","日能研","全教研"]:["日能研","四谷大塚","能開センター"]);
   const cands=all.filter(sch=>PRIVATE.test(sch[0])&&sch[1]>=55).sort((a,b)=>b[1]-a[1]);const top=cands.find(sch=>sch[1]>d+2&&sch[1]<=d+12),mid=cands.find(sch=>sch[1]<=d+2);
   const go=(sch)=>{L.ikkan=sch;log(L,`${sch[0]}の中等部に合格した。中高一貫、6年間通う。`,"big");add(L,"k",8);L.assets-=0};
   const o=[];if(top)o.push({t:`${top[0]}（中等部）を受ける`,s:`偏差値${top[1]}・難関。合格の見込み30%`,w:30,f(){log(L,`小4から${juku}に通い、中学受験の勉強を始めた。`);log(L,pick([`母の${L.mom}が塾の成績表を見るたびに怒鳴るようになった。`,`父の${L.dad}に「落ちたら恥ずかしい」と言われた。`,"夜10時まで塾、帰って宿題。友だちと遊ぶ時間はなかった。","母が塾の弁当を毎日作ってくれた。"]),"red");add(L,"j",-5);if(R()<.3)go(top);else{log(L,`${top[0]}に落ちた。`,"red");if(mid&&R()<.7)go(mid);else{log(L,"地元の公立中学に進んだ。");add(L,"j",-5)}}}});
   if(mid)o.push({t:`${mid[0]}（中等部）を受ける`,s:`偏差値${mid[1]}。見込み75%`,w:40,f(){log(L,`小5から${juku}に通った。`);log(L,pick([`母の${L.mom}が算数の問題を一緒に解いてくれた。`,"偏差値の話を夕飯のたびにされた。","塾の模試のあと、父と口論になった。"]));if(R()<.75)go(mid);else{log(L,`${mid[0]}に落ちた。地元の公立中学に進んだ。`,"red");add(L,"j",-4)}}});
   o.push({t:"中学受験はしない",s:"地元の公立中学へ",w:50,f(){log(L,"中学受験はせず、友だちと同じ地元の中学に進むことにした。")}});
-  return{auto:1,title:"小学5年。親に「中学受験、どうする？」と聞かれた。",text:`${L.home}の私立中学受験。塾代は年100万円近くかかる。`,opts:o}}
+  return{title:"小学5年。親に「中学受験、どうする？」と聞かれた。",text:`${L.home}の私立中学受験。塾代は年100万円近くかかる。`,opts:o}}
 function decTrack(L){return{moral:1,title:"文理選択。",text:"高2のクラス分け。",opts:[
   {t:"理系（＋５）",s:"数学III・物理",w:L.st.k>55?55:40,f(){L.track="理";log(L,`理系クラスに進んだ。（＋５）${pick(["数学が得意だった","医者になりたかった","父が工場勤めで、ものづくりに興味があった","理系のほうが就職に強いと聞いた","好きな人が理系だった"])}。`);add(L,"k",2)}},
   {t:"文系",s:"",w:50,f(){L.track="文";log(L,`文系クラスに進んだ。（＋０）${pick(["数学で赤点を取った","本を読むのが好きだった","弁護士になりたかった","友だちが文系だった","将来は決めていなかった"])}。`)}}]}}
@@ -1109,6 +1109,8 @@ function home(){
       <input type="text" id="nick" maxlength="20" placeholder="例：るっち" value="${esc(nick())}" style="font-size:15px;max-width:260px"></div>
     <div class="row"><span class="label">生まれる都道府県（任意。選ばなければ出生数に応じてランダム。市区町村はこちらで決めます）</span>
       <select id="bornpref"><option value="">ランダム</option>${P.map(p=>`<option>${p.full}</option>`).join("")}</select></div>
+    <div class="row"><span class="label">自分で決めること</span>
+      <div class="chips" id="pathsopt"><button class="chip" data-v="0" aria-pressed="${!S.paths}">善悪の選択だけ（進路はストーリー）</button><button class="chip" data-v="1" aria-pressed="${S.paths}">受験校（中学・高校・大学）も自分で決める</button></div></div>
     <div class="row"><span class="label">生まれる年（統計は今のまま。暦年の出来事だけ変わる）</span>
       <select id="byear"><option value="2024">2024年（いま）</option>${[2010,2000,1990,1980,1970,1960].map(y=>`<option value="${y}">${y}年</option>`).join("")}</select></div>
     <div class="row"><span class="label">あなたが生まれた都道府県（任意・この端末だけに保存）</span>
@@ -1125,6 +1127,7 @@ function home(){
     cb.textContent=Math.floor(s/BI);cd.textContent=Math.floor(s/DI);$("#cbn").textContent=`次の赤ちゃんまで ${Math.ceil(BI-s%BI)}秒（46秒に1人）`;$("#cdn").textContent=`次まで ${Math.ceil(DI-s%DI)}秒（20秒に1人）`},250);
   document.querySelectorAll("#spd .chip").forEach(b=>b.onclick=()=>{S.speed=+b.dataset.v;home()});
   $("#mine").onchange=e=>{try{localStorage.setItem("68man_mine",e.target.value)}catch(_){}};
+  document.querySelectorAll("#pathsopt .chip").forEach(b=>b.onclick=()=>{S.paths=b.dataset.v==="1";document.querySelectorAll("#pathsopt .chip").forEach(x=>x.setAttribute("aria-pressed",x===b))});
   loadReviews($("#reviews"));$("#go").onclick=()=>{try{localStorage.setItem("68man_nick",$("#nick").value.trim().slice(0,20))}catch(e){}birth(null,$("#bornpref").value||null,+$("#byear").value)};showPlays();
 }
 function myPref(){try{return localStorage.getItem("68man_mine")||""}catch(e){return""}}
